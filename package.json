@@ -1,0 +1,113 @@
+{
+  "name": "codebook",
+  "displayName": "Codebook",
+  "publisher": "codebooknet",
+  "version": "0.0.1",
+  "description": "Run Markdown documents as interactive notebooks",
+  "main": "./dist/extension.js",
+  "icon": "codebook.png",
+  "keywords": [
+    "notebook",
+    "notebooks",
+    "note",
+    "book",
+    "code"
+  ],
+  "engines": {
+    "vscode": "^1.63.0"
+  },
+  "repository": {
+    "url": "https://github.com/jackos/codebook"
+  },
+  "scripts": {
+    "compile": "node ./build.js",
+    "watch": "node ./build.js --watch",
+    "vscode:prepublish": "node ./build.js --production",
+    "lint": "eslint src --ext ts"
+  },
+  "activationEvents": [
+    "onNotebook:codebook",
+    "onCommand:codebook.search",
+    "onCommand:codebook.preview",
+    "onCommand:codebook.openMain"
+  ],
+  "author": "Jack Clayton",
+  "license": "ISC",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Codebook configuration",
+      "properties": {
+        "codebook.basePath": {
+          "description": "Path where searchable notes will be stored",
+          "type": "string",
+          "scope": "window"
+        },
+        "codebook.baseFile": {
+          "description": "The index file that will be opened when searching",
+          "type": "string",
+          "scope": "window"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "codebook.search",
+        "title": "Codebook: Search notes",
+        "description": "Adds notes base path to workspace and opens `find in files`"
+      },
+      {
+        "command": "codebook.openMain",
+        "title": "Codebook: Open generated code",
+        "description": "Opens the code being generated in a side tab"
+      }
+    ],
+    "keybindings": [
+      {
+        "key": "alt+f",
+        "command": "codebook.search"
+      },
+      {
+        "key": "alt+o",
+        "command": "codebook.openMain"
+      }
+    ],
+    "notebooks": [
+      {
+        "type": "codebook",
+        "displayName": "Codebook",
+        "priority": "default",
+        "selector": [
+          {
+            "filenamePattern": "*.{md,markdown}"
+          }
+        ]
+      }
+    ],
+    "notebookRenderer": [
+      {
+        "id": "codebook",
+        "displayName": "Codebook",
+        "entrypoint": "./dist/extension.js",
+        "mimeTypes": [
+          "x-application/codebook"
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.13",
+    "@types/vscode": "^1.63.1",
+    "@typescript-eslint/eslint-plugin": "^5.10.2",
+    "@typescript-eslint/parser": "^5.10.2",
+    "esbuild": "^0.14.15",
+    "eslint": "^8.8.0",
+    "typescript": "^4.5.5"
+  }
+}

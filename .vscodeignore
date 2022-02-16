@@ -1,0 +1,12 @@
+target
+build.js
+cargo.toml
+cargo.lock
+package-lock.json
+*.vsix
+src
+tests
+node_modules
+docs
+.vscode
+.gitignore
