@@ -39,7 +39,7 @@ export class Kernel {
         let range = new NotebookRange(0, cells[0].index + 1);
         let cellsAll = doc.getCells(range);
 
-        // Build a object containing languages and there cells
+        // Build a object containing languages and their cells
         let cellsStripped: Cell[] = [];
         let matchingCells = 0;
         for (const cell of cellsAll) {
@@ -55,8 +55,9 @@ export class Kernel {
 
         const runProgram = new Promise((resolve, reject) => {
             let output: ChildProcessWithoutNullStreams;
-            console.log(cells[0].document.languageId)
-            switch (cells[0].document.languageId) {
+            const lang = cells[0].document.languageId
+            const mimeType = `text/x-${lang}`
+            switch (lang) {
                 case "rust":
                     lastRunLanguage = "rust";
                     output = processCellsRust(cellsStripped);
@@ -79,7 +80,7 @@ export class Kernel {
                     break;
                 default:
                     let response = encoder.encode("Language hasn't been implemented yet");
-                    const x = new NotebookCellOutputItem(response, "text/plain");
+                    const x = new NotebookCellOutputItem(response, mimeType);
                     exec.appendOutput([new NotebookCellOutput([x])], cells[0]);
                     exec.end(false, (new Date).getTime());
                     return;
@@ -87,16 +88,15 @@ export class Kernel {
 
             let fixingImports = false;
             let currentCell = cellsStripped.pop();
-            let error = false;
 
             output.stderr.on("data", async (data: Uint8Array) => {
-                error = true;
                 if (data.toString().match(/no required module provides/) || data.toString().match(/go: updates to go.mod needed/)) {
                     fixingImports = true;
                     await fixImportsGo(exec, currentCell.cell);
                 }
-                const x = new NotebookCellOutputItem(data, "text/plain");
-                exec.appendOutput([new NotebookCellOutput([x])], currentCell.cell);
+                exec.appendOutput([new NotebookCellOutput([
+                    NotebookCellOutputItem.text(data.toString(), mimeType)
+                ])])
             });
 
             let buf = Buffer.from([]);
@@ -107,24 +107,16 @@ export class Kernel {
 
             output.on('close', (code) => {
                 if (!fixingImports) {
-                    // If stdout returned anything consider it a success 
-                    if (buf.length == 0 || error) {
+                    // If stdout returned anything consider it a success, even on empty
+                    // response this will still contain 1 !!output-start-cell
+                    if (buf.length == 0) {
                         exec.end(false, (new Date).getTime());
                     } else {
+                        console.log(decoder.decode(buf))
                         let outputs = decoder.decode(buf).split("!!output-start-cell\n");
-                        // Async update all the other cells, they'll update in there own time
-                        for (let cell of cellsStripped) {
-                            exec.clearOutput(cell.cell);
-                            const bodyU8 = encoder.encode(outputs[cell.index]);
-                            const x = new NotebookCellOutputItem(bodyU8, "text/plain");
-                            exec.appendOutput([new NotebookCellOutput([x])], cell.cell);
-                        }
-                        // This is the cell that's being run, need to await this execution
-                        // before calling `exec.end`
-                        exec.clearOutput(currentCell.cell);
-                        const bodyU8 = encoder.encode(outputs[currentCell.index]);
-                        const x = new NotebookCellOutputItem(bodyU8, "text/plain");
-                        exec.appendOutput([new NotebookCellOutput([x])], currentCell.cell);
+                        exec.replaceOutput([new NotebookCellOutput([
+                            NotebookCellOutputItem.stdout(outputs[currentCell.index])
+                        ])])
                         exec.end(true, (new Date).getTime());
                     }
                     console.log(`child process exited with code ${code}`);
@@ -132,7 +124,6 @@ export class Kernel {
                 }
             });
         });
-
         await runProgram;
     }
 }
