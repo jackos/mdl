@@ -80,7 +80,7 @@ export class Kernel {
                     break;
                 default:
                     let response = encoder.encode("Language hasn't been implemented yet");
-                    const x = new NotebookCellOutputItem(response, mimeType);
+                    const x = new NotebookCellOutputItem(response, "text/plain");
                     exec.appendOutput([new NotebookCellOutput([x])], cells[0]);
                     exec.end(false, (new Date).getTime());
                     return;
@@ -115,7 +115,7 @@ export class Kernel {
                         console.log(decoder.decode(buf))
                         let outputs = decoder.decode(buf).split("!!output-start-cell\n");
                         exec.replaceOutput([new NotebookCellOutput([
-                            NotebookCellOutputItem.stdout(outputs[currentCell.index])
+                            NotebookCellOutputItem.text(outputs[currentCell.index])
                         ])])
                         exec.end(true, (new Date).getTime());
                     }

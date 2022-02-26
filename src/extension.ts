@@ -7,44 +7,9 @@ import {
   CancellationToken, NotebookSerializer, NotebookData, NotebookCellData
 } from 'vscode';
 import { openMain } from './commands/openMain';
-import {
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind
-} from 'vscode-languageclient/node';
 
 const kernel = new Kernel();
-
-let client: LanguageClient
-
 export async function activate(context: ExtensionContext) {
-
-  let serverModule = "/usr/bin/rust-analyzer";
-  // let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
-  let serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
-    debug: { module: serverModule, transport: TransportKind.ipc }
-  }
-  // Options to control the language client
-  let clientOptions: LanguageClientOptions = {
-    // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'markdown' }],
-    synchronize: {
-      // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher('**/.md')
-    }
-  };
-  // Create the language client and start the client.
-  client = new LanguageClient(
-    'languageServerExample',
-    'Language Server Example',
-    serverOptions,
-    clientOptions
-  );
-  client.start();
-
-
   const controller = notebooks.createNotebookController('codebook', 'codebook', 'Codebook');
 
   controller.supportedLanguages = ['rust', 'go', 'javascript', 'typescript', 'nushell'];
@@ -71,7 +36,6 @@ export async function activate(context: ExtensionContext) {
   };
 
   context.subscriptions.push(workspace.registerNotebookSerializer('codebook', new MarkdownProvider(), notebookSettings));
-
 }
 
 class MarkdownProvider implements NotebookSerializer {
