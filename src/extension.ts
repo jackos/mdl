@@ -1,7 +1,6 @@
 import { parseMarkdown, writeCellsToMarkdown, RawNotebookCell } from './markdownParser';
 import { searchNotes } from './commands/search';
 import { Kernel } from './kernel';
-import * as path from 'path'
 import {
   window, notebooks, commands, workspace, ExtensionContext,
   CancellationToken, NotebookSerializer, NotebookData, NotebookCellData
