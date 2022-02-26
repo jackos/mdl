@@ -26,27 +26,26 @@ Press `alt+o` to open up the source code being used to generate outputs, which w
 It's very simple to add your own language, look inside [src/languages/rust.ts](https://github.com/jackos/codebook/blob/main/src/languages/rust.ts) for an example, then add your language to the switch statement in [`src/kernel.ts`](https://github.com/jackos/codebook/blob/main/src/kernel.ts). Please open a pull request if you add a language, it's a lot easier than you might expect and it will be appreciated.
 
 ### Rust       
-- [x] Runs (0.1ms)
-- [ ] Language Server
-- [x] Import External Code
+- Latency 0.1ms
+- Import External Code
 
 ### Go         
-- [x] Runs (0.1ms)
-- [ ] Language Server
-- [x] Import External Code
+- Latency 0.1ms
+- Import External Code
 
 ### Javascript 
-- [x] Runs (0.3ms)
-- [x] Language Server
-- [ ] Import External Code
+- Latency 0.3ms
+- Language server
 
 ### Typescript 
-- [x] Runs (0.7ms)
-- [x] Language Server
-- [ ] Import External Code
+- Latency 0.7ms
+- Language server
 
 ## Inspiration
 - Vimwiki
 - Jupyter Notebook
 - [This comment](https://news.ycombinator.com/item?id=11042400)
+
+
+
 

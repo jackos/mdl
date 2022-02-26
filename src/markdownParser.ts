@@ -20,6 +20,8 @@ const LANG_IDS = new Map([
 	['js', 'javascript'],
 	['ts', 'typescript'],
 	['rust', 'rust'],
+	['go', 'go'],
+	['nu', 'nushell'],
 ]);
 
 const LANG_ABBREVS = new Map(

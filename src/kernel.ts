@@ -4,6 +4,7 @@ import { fixImportsGo, processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
 import { ChildProcessWithoutNullStreams } from 'child_process';
+import { processCellsNushell as processCellsShell } from './languages/nushell';
 
 export interface Cell {
     index: number;
@@ -54,6 +55,7 @@ export class Kernel {
 
         const runProgram = new Promise((resolve, reject) => {
             let output: ChildProcessWithoutNullStreams;
+            console.log(cells[0].document.languageId)
             switch (cells[0].document.languageId) {
                 case "rust":
                     lastRunLanguage = "rust";
@@ -71,6 +73,10 @@ export class Kernel {
                     lastRunLanguage = "typescript";
                     output = processCellsTypescript(cellsStripped);
                     break;
+                case "nushell":
+                    lastRunLanguage = "nushell";
+                    output = processCellsShell(cellsStripped);
+                    break;
                 default:
                     let response = encoder.encode("Language hasn't been implemented yet");
                     const x = new NotebookCellOutputItem(response, "text/plain");
@@ -79,11 +85,12 @@ export class Kernel {
                     return;
             }
 
-            console.log("Running rest of logic");
             let fixingImports = false;
             let currentCell = cellsStripped.pop();
+            let error = false;
 
             output.stderr.on("data", async (data: Uint8Array) => {
+                error = true;
                 if (data.toString().match(/no required module provides/) || data.toString().match(/go: updates to go.mod needed/)) {
                     fixingImports = true;
                     await fixImportsGo(exec, currentCell.cell);
@@ -101,7 +108,9 @@ export class Kernel {
             output.on('close', (code) => {
                 if (!fixingImports) {
                     // If stdout returned anything consider it a success 
-                    if (buf.length > 0) {
+                    if (buf.length == 0 || error) {
+                        exec.end(false, (new Date).getTime());
+                    } else {
                         let outputs = decoder.decode(buf).split("!!output-start-cell\n");
                         // Async update all the other cells, they'll update in there own time
                         for (let cell of cellsStripped) {
@@ -117,8 +126,6 @@ export class Kernel {
                         const x = new NotebookCellOutputItem(bodyU8, "text/plain");
                         exec.appendOutput([new NotebookCellOutput([x])], currentCell.cell);
                         exec.end(true, (new Date).getTime());
-                    } else {
-                        exec.end(false, (new Date).getTime());
                     }
                     console.log(`child process exited with code ${code}`);
                     resolve(0);

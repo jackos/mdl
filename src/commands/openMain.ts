@@ -18,6 +18,10 @@ export const openMain = async () => {
 			dir = path.join(tempDir, 'go');
 			main = path.join(dir, 'main.go');
 			break;
+		case "nushell":
+			dir = path.join(tempDir, 'nu');
+			main = path.join(dir, 'main.nu');
+			break;
 		default:
 			window.showErrorMessage("Language not implemented in `src/commands/openMain` please open Github issue");
 			return;
