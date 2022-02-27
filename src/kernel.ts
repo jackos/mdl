@@ -53,7 +53,7 @@ export class Kernel {
             }
         }
 
-        const runProgram = new Promise((resolve, reject) => {
+        const runProgram = new Promise((resolve, _) => {
             let output: ChildProcessWithoutNullStreams;
             const lang = cells[0].document.languageId
             const mimeType = `text/plain`
@@ -105,22 +105,23 @@ export class Kernel {
                 buf = Buffer.concat(arr);
             });
 
-            output.on('close', (code) => {
+            output.on('close', (_) => {
                 if (!fixingImports) {
                     // If stdout returned anything consider it a success, even on empty
                     // response this will still contain !!output-start-cell
                     if (buf.length == 0) {
                         exec.end(false, (new Date).getTime());
                     } else {
-                        console.log(decoder.decode(buf))
                         let outputs = decoder.decode(buf).split("!!output-start-cell\n");
-                        let currentCellOutput = outputs[currentCell.index] + stripErrors(errorText);
-                        exec.replaceOutput([new NotebookCellOutput([
-                            NotebookCellOutputItem.text(currentCellOutput)
-                        ])])
+                        let currentCellOutput = outputs[currentCell.index]
+                        if (lang === "rust") {
+                            currentCellOutput += stripErrors(errorText);
+                        } else {
+                            currentCellOutput += errorText;
+                        }
+                        exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])])
                         exec.end(true, (new Date).getTime());
                     }
-                    console.log(`child process exited with code ${code}`);
                     resolve(0);
                 }
             });

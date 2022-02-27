@@ -9,8 +9,10 @@ let tempDir = getTempPath();
 // output because it contains `dbg!` info, but we don't want certain useless text on 
 // success. On failure this text will remain in the output
 export const stripErrors = (errorText: string): string => {
-	let compiling = /\s*[Compiling|Finished|Running] .*\n/
-	return errorText.replace(compiling, "").trim();
+	let compiling = /\s*Compiling .*\n/
+	let finished = /\s*Finished .*\n/
+	let running = /\s*Running .*\n/
+	return errorText.replace(compiling, "").replace(finished, "").replace(running, "").trim();
 }
 
 export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams => {

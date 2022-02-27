@@ -16,7 +16,6 @@ interface ICodeBlockStart {
 }
 
 const LANG_IDS = new Map([
-	['bat', 'batch'],
 	['js', 'javascript'],
 	['ts', 'typescript'],
 	['rust', 'rust'],

@@ -1,5 +1,9 @@
 
 # Changelog
+## v0.1.5
+### Fixes
+- Bug with Rust outputs sometimes containing unwanted text
+
 ## v0.1.4
 ### Fixes
 - Support Rust main functions with different signatures
@@ -25,4 +29,5 @@
 
 ## v0.0.1
 Initial commit
+
 

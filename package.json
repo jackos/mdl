@@ -2,7 +2,7 @@
   "name": "codebook",
   "displayName": "Codebook",
   "publisher": "codebook",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Execute code blocks in Markdown documents and save the output",
   "main": "./dist/extension.js",
   "icon": "codebook.png",
