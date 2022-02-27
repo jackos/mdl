@@ -5,15 +5,12 @@ import { Cell } from "../kernel";
 
 let tempDir = getTempPath();
 
-// Rust doesn't allow piping stderr to stdout, but we want
-// that output because it contains `dbg!` info and gives us messages
-// when importing and compiling external packages. So we just
-// remove text we don't want here.
+// Rust doesn't allow piping stderr to stdout without external crates, we want stderr
+// output because it contains `dbg!` info, but we don't want certain useless text on 
+// success. On failure this text will remain in the output
 export const stripErrors = (errorText: string): string => {
-	let compiling = /\s*Compiling .*\n/
-	let finished = /\s*Finished .*\n/
-	let running = /\s*Running .*\n/
-	return errorText.replace(compiling, "").replace(finished, "").replace(running, "").trim();
+	let compiling = /\s*[Compiling|Finished|Running] .*\n/
+	return errorText.replace(compiling, "").trim();
 }
 
 export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams => {
