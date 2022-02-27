@@ -2,7 +2,7 @@
   "name": "codebook",
   "displayName": "Codebook",
   "publisher": "codebook",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Run Markdown documents as interactive notebooks",
   "main": "./dist/extension.js",
   "icon": "codebook.png",

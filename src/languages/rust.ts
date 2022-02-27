@@ -5,7 +5,18 @@ import { Cell } from "../kernel";
 
 let tempDir = getTempPath();
 
-export let processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams => {
+// Rust doesn't allow piping stderr to stdout, but we want
+// that output because it contains `dbg!` info and gives us messages
+// when importing and compiling external packages. So we just
+// remove text we don't want here.
+export const stripErrors = (errorText: string): string => {
+	let compiling = /\s*Compiling .*\n/
+	let finished = /\s*Finished .*\n/
+	let running = /\s*Running .*\n/
+	return errorText.replace(compiling, "").replace(finished, "").replace(running, "").trim();
+}
+
+export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams => {
 	let crates = "";
 	let outerScope = "";
 	let innerScope = "";
@@ -25,7 +36,7 @@ export let processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams =>
 				outerScope += line;
 				outerScope += "\n";
 				if (!line.startsWith("use std")) {
-					let match = line.match(/use (\w+)::[\{\w]+/);
+					let match = line.match(/use (\w+)/);
 					if (match) {
 						let crate = match[1];
 						let alreadyFound = crates.split("\n");

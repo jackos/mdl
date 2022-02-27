@@ -1,12 +1,15 @@
 
 # Changelog
+
+## v0.1.3
+### Fixes
+- Fixed `dbg` outputs from Rust and other `stderr` text not being displayed on final output
+
 ## v0.1.2
 ### Fixes
-- Sometimes using the mimetypes e.g. "text/x-rust" will fail, removing feature until fixed
+- Sometimes using the mimetypes e.g. "text/x-rust" will fail, also doesn't look right with errors, removed for now, will need custom renderers
 
 ## v0.1.1
-### Features
-- Colorful output on errors, for specified language. Can be improved by writing specific parsers for each language output errors, current just uses default language formatter
 ### Fixes
 - Simplified all the stdout and stderr operations, fixed outputs not displaying in rust
 
@@ -18,5 +21,3 @@
 
 ## v0.0.1
 Initial commit
-
-
