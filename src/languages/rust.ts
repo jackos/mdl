@@ -17,6 +17,7 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 	let crates = "";
 	let outerScope = "";
 	let innerScope = "";
+	let mainFunc = "fn main() {\n";
 	let containsMain = false;
 
 	for (const cell of cells) {
@@ -26,6 +27,7 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 			line = line.trim();
 			if (line.startsWith("fn main()")) {
 				containsMain = true;
+				mainFunc = line;
 				continue;
 			}
 
@@ -40,7 +42,7 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 						let latestVersion = '="*"';
 
 						if (alreadyFound.indexOf(crate + latestVersion) < 0) {
-							crates += crate.replace(/_/g, "-") + latestVersion + "\n";
+							crates += crate + latestVersion + "\n";
 						}
 					}
 				}
@@ -55,7 +57,7 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 			containsMain = false;
 		}
 	}
-	let main = "#![allow(dead_code)]\n" + outerScope + "fn main() {\n" + innerScope + "}";
+	let main = "#![allow(dead_code)]\n" + outerScope + mainFunc + innerScope + "}";
 	let cargo = '[package]\nname = "output"\nversion = "0.0.1"\nedition="2021"\n[dependencies]\n' + crates;
 
 	mkdirSync(`${tempDir}/rust/src`, { recursive: true });

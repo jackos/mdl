@@ -1,5 +1,9 @@
 
 # Changelog
+## v0.1.4
+### Fixes
+- Support Rust main functions with different signatures
+- Fix rust imports using `_` seperators
 
 ## v0.1.3
 ### Fixes
@@ -21,3 +25,4 @@
 
 ## v0.0.1
 Initial commit
+
