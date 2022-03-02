@@ -31,9 +31,6 @@ export class Kernel {
         exec.start((new Date).getTime());
         exec.clearOutput(cells[0]);
 
-        // Allow for the ability to cancel execution
-        let token = exec.token;
-        token.onCancellationRequested(() => exec.end(false, (new Date).getTime()));
 
         // Get all cells up to this one
         let range = new NotebookRange(0, cells[0].index + 1);
@@ -95,6 +92,13 @@ export class Kernel {
                     exec.end(false, (new Date).getTime());
                     return;
             }
+            // Allow for the ability to cancel execution
+            let token = exec.token;
+            token.onCancellationRequested(() => {
+                output.kill();
+                exec.end(false, (new Date).getTime());
+            });
+
 
             let fixingImports = false;
             let currentCell = cellsStripped.pop();
