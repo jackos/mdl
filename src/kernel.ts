@@ -3,7 +3,7 @@ import { processCellsRust, stripErrors } from "./languages/rust";
 import { fixImportsGo, processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
-import { ChildProcessWithoutNullStreams } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
 import { processCellsNushell as processCellsShell } from './languages/nushell';
 
 export interface Cell {
@@ -71,7 +71,17 @@ export class Kernel {
                     output = processCellsJavascript(cellsStripped);
                     break;
                 case "typescript":
+                    let esr = spawnSync("esr");
+                    if (esr.stdout === null) {
+                        let response = encoder.encode("To make TypeScript run fast install esr globally:\nnpm install -g esbuild-runner");
+                        const x = new NotebookCellOutputItem(response, "text/plain");
+                        exec.appendOutput([new NotebookCellOutput([x])], cells[0]);
+                        exec.end(false, (new Date).getTime());
+                        return;
+                    }
+
                     lastRunLanguage = "typescript";
+
                     output = processCellsTypescript(cellsStripped);
                     break;
                 case "nushell":
@@ -91,6 +101,7 @@ export class Kernel {
             let errorText = "";
 
             output.stderr.on("data", async (data: Uint8Array) => {
+                console.log("Error: ", data)
                 if (data.toString().match(/no required module provides/) || data.toString().match(/go: updates to go.mod needed/)) {
                     fixingImports = true;
                     await fixImportsGo(exec, currentCell.cell);
@@ -106,6 +117,7 @@ export class Kernel {
             });
 
             output.on('close', (_) => {
+                console.log("close")
                 if (!fixingImports) {
                     // If stdout returned anything consider it a success, even on empty
                     // response this will still contain !!output-start-cell

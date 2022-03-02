@@ -2,6 +2,10 @@
 # Changelog
 ## v0.1.5
 ### Fixes
+- Use esbuild-runner instead of ts-node for typescript, give warning text if not installed
+
+## v0.1.5
+### Fixes
 - Bug with Rust outputs sometimes containing unwanted text
 
 ## v0.1.4
@@ -29,5 +33,6 @@
 
 ## v0.0.1
 Initial commit
+
 
 

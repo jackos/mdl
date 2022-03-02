@@ -1,4 +1,3 @@
-
 import { ChildProcessWithoutNullStreams, spawn, spawnSync } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
@@ -22,7 +21,5 @@ export let processCellsTypescript = (cells: Cell[]): ChildProcessWithoutNullStre
 	let mainFile = `${tempDir}/typescript/main`;
 	mkdirSync(`${tempDir}/typescript`, { recursive: true });
 	writeFileSync(mainFile + ".ts", innerScope);
-	// spawnSync('tsc', [mainFile + ".ts"]);
-
-	return spawn('ts-node', [mainFile + ".ts"]);
+	return spawn('esr', [mainFile + ".ts"]);
 };
