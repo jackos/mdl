@@ -76,9 +76,7 @@ export class Kernel {
                         exec.end(false, (new Date).getTime());
                         return;
                     }
-
                     lastRunLanguage = "typescript";
-
                     output = processCellsTypescript(cellsStripped);
                     break;
                 case "nushell":
@@ -131,7 +129,9 @@ export class Kernel {
                         let outputs = decoder.decode(buf).split("!!output-start-cell\n");
                         let currentCellOutput = outputs[currentCell.index]
                         if (lang === "rust") {
+                            const debugRe = /\[\w*[\/|\\]\w+[.]rs:\d+]/gm
                             currentCellOutput += stripErrors(errorText);
+                            currentCellOutput = currentCellOutput.replace(debugRe, "");
                         } else {
                             currentCellOutput += errorText;
                         }

@@ -22,10 +22,14 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 	let mainFunc = "fn main() {\n";
 	let containsMain = false;
 
+	let dbg = false;
 	for (const cell of cells) {
 		innerScope += `\nprintln!("!!output-start-cell");\n`;
 		let lines = cell.contents.split("\n");
+		const len = lines.length;
+		let i = 0;
 		for (let line of lines) {
+			i++;
 			line = line.trim();
 			if (line.startsWith("fn main()")) {
 				containsMain = true;
@@ -49,6 +53,12 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 					}
 				}
 			} else {
+				if (i == len) {
+					// If last item is an expression, debug it
+					if (line[line.length - 1] !== ";" && line[line.length - 1] !== "}") {
+						line = "dbg!(" + line + ");"
+					}
+				}
 				innerScope += line;
 				innerScope += "\n";
 			}
