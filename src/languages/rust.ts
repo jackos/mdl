@@ -5,37 +5,39 @@ import { Cell } from "../kernel";
 
 let tempDir = getTempPath();
 
-// Rust doesn't allow piping stderr to stdout without external crates, we want stderr
-// output because it contains `dbg!` info, but we don't want certain useless text on 
-// success. On failure this text will remain in the output
-export const stripErrors = (errorText: string): string => {
-	let compiling = /\s*Compiling .*\n/
-	let finished = /\s*Finished .*\n/
-	let running = /\s*Running .*\n/
-	return errorText.replace(compiling, "").replace(finished, "").replace(running, "").trim();
-}
-
 export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams => {
 	let crates = "";
 	let outerScope = "";
 	let innerScope = "";
 	let mainFunc = "fn main() {\n";
 	let containsMain = false;
+	let cell_count = 0;
 
-	let dbg = false;
 	for (const cell of cells) {
+		cell_count++;
 		innerScope += `\nprintln!("!!output-start-cell");\n`;
 		let lines = cell.contents.split("\n");
 		const len = lines.length;
 		let i = 0;
 		for (let line of lines) {
-			i++;
 			line = line.trim();
+			if (line.startsWith("#[ignore]")) {
+				break;
+			}
+			i++;
+
+			if (line.startsWith("#[restart]")) {
+				innerScope = `\nprintln!("!!output-start-cell");\n`.repeat(cell_count);
+				containsMain = false;
+				continue;
+			}
+
 			if (line.startsWith("fn main()")) {
 				containsMain = true;
 				mainFunc = line;
 				continue;
 			}
+
 
 			if (line.startsWith("use")) {
 				outerScope += line;
@@ -56,7 +58,7 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 				if (i == len) {
 					// If last item is an expression, debug it
 					if (line[line.length - 1] !== ";" && line[line.length - 1] !== "}") {
-						line = "dbg!(" + line + ");"
+						line = "println!(" + "\"{}\", " + line + ");"
 					}
 				}
 				innerScope += line;
@@ -69,12 +71,33 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 			containsMain = false;
 		}
 	}
-	let main = "#![allow(dead_code)]\n" + outerScope + mainFunc + innerScope + "}";
+	// Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr
+	let prelude = `#![allow(dead_code)]\n
+	macro_rules! dbg {
+		() => {
+			::std::println!("[{}:{}]", ::std::file!(), ::std::line!())
+		};
+		($val:expr $(,)?) => {
+			match $val {
+				tmp => {
+					::std::println!("[{}:{}] {} = {:#?}",
+						::std::file!(), ::std::line!(), ::std::stringify!($val), &tmp);
+					tmp
+				}
+			}
+		};
+		($($val:expr),+ $(,)?) => {
+			($(::std::dbg!($val)),+,)
+		};
+	}`
+	let main = prelude + outerScope + mainFunc + innerScope + "}";
+	let mainFormatted = (outerScope + mainFunc + innerScope + "}")
+	mainFormatted = mainFormatted.replace(/\nprintln!\("!!output-start-cell"\);\n/g, "");
 	let cargo = '[package]\nname = "output"\nversion = "0.0.1"\nedition="2021"\n[dependencies]\n' + crates;
 
 	mkdirSync(`${tempDir}/rust/src`, { recursive: true });
 	writeFileSync(`${tempDir}/rust/src/main.rs`, main);
+	writeFileSync(`${tempDir}/rust/src/main-formatted.rs`, mainFormatted);
 	writeFileSync(`${tempDir}/rust/Cargo.toml`, cargo);
-
 	return spawn('cargo', ['run', '--manifest-path', `${tempDir}/rust/Cargo.toml`]);
 };

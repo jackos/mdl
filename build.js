@@ -10,7 +10,7 @@ require("esbuild")
     format: "cjs",
     sourcemap: !production,
     minify: production,
-    target: ["ES2020"],
+    target: ["ES2021"],
     platform: "node",
     watch: watch && {
       onRebuild(error) {

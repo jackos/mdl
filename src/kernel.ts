@@ -97,13 +97,11 @@ export class Kernel {
                 exec.end(false, (new Date).getTime());
             });
 
-
             let fixingImports = false;
             let currentCell = cellsStripped.pop();
             let errorText = "";
 
             output.stderr.on("data", async (data: Uint8Array) => {
-                console.log("Error: ", data)
                 if (data.toString().match(/no required module provides/) || data.toString().match(/go: updates to go.mod needed/)) {
                     fixingImports = true;
                     await fixImportsGo(exec, currentCell.cell);
@@ -116,26 +114,19 @@ export class Kernel {
             output.stdout.on('data', (data: Uint8Array) => {
                 let arr = [buf, data];
                 buf = Buffer.concat(arr);
+                let outputs = decoder.decode(buf).split("!!output-start-cell\n");
+                let currentCellOutput = outputs[currentCell.index]
+                // currentCellOutput += errorText;
+                exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])])
             });
 
             output.on('close', (_) => {
-                console.log("close")
                 if (!fixingImports) {
                     // If stdout returned anything consider it a success, even on empty
                     // response this will still contain !!output-start-cell
                     if (buf.length == 0) {
                         exec.end(false, (new Date).getTime());
                     } else {
-                        let outputs = decoder.decode(buf).split("!!output-start-cell\n");
-                        let currentCellOutput = outputs[currentCell.index]
-                        if (lang === "rust") {
-                            const debugRe = /\[\w*[\/|\\]\w+[.]rs:\d+]/gm
-                            currentCellOutput += stripErrors(errorText);
-                            currentCellOutput = currentCellOutput.replace(debugRe, "");
-                        } else {
-                            currentCellOutput += errorText;
-                        }
-                        exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])])
                         exec.end(true, (new Date).getTime());
                     }
                     resolve(0);
