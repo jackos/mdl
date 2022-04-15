@@ -2,6 +2,8 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
 import { Cell } from "../kernel";
+import { prelude } from "./rust_prelude";
+
 
 let tempDir = getTempPath();
 
@@ -62,7 +64,12 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 				if (i == len) {
 					// If last item is an expression, debug it
 					if (line[line.length - 1] !== ";" && line[line.length - 1] !== "}") {
-						line = "println!(" + "\"{}\", " + line + ");"
+						// if first char is `#` pretty print
+						if (line[0] === "#") {
+							line = "dbg_pretty!(&" + line.substring(1) + ");";
+						} else {
+							line = "dbg!(&" + line + ");"
+						}
 					}
 				}
 				innerScope += line;
@@ -75,24 +82,6 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 			containsMain = false;
 		}
 	}
-	// Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr, also stops
-	// the line numbers and file name being printed which we don't want
-	let prelude = `#![allow(unused_macros)]\n
-#![allow(dead_code)]\n
-macro_rules! dbg {
-    ($val:expr $(,)?) => {
-        match $val {
-            tmp => {
-                ::std::println!("{:#?}",
-                        &tmp);
-                tmp
-            }
-        }
-    };
-    ($($val:expr),+ $(,)?) => {
-        ($(dbg!($val)),+,)
-    };
-}`
 	let main = prelude + outerScope + mainFunc + innerScope + "}";
 	let mainFormatted = (outerScope + mainFunc + innerScope + "}")
 	mainFormatted = mainFormatted.replace(/\nprintln!\("!!output-start-cell"\);\n/g, "\n");

@@ -1,6 +1,13 @@
 # Changelog
+## v0.3.0
+### Features
+- Make end statement a dbg! instead of print to print a much larger array of types. 
+- Added macro dbg_pretty! and dbg_named! to retain variable name when doing something in a loop.
+- Added the ability to use `#` if last line is an expression to pretty print debug
+
 ## v0.2.1
 ### Bug Fix
+- Make dbg! not print line numbers and file name
 
 ## v0.2.0
 ### Features
