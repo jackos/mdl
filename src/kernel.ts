@@ -1,10 +1,10 @@
 import { NotebookDocument, NotebookCell, NotebookController, NotebookCellOutput, NotebookCellOutputItem, NotebookRange, } from 'vscode';
-import { processCellsRust, stripErrors } from "./languages/rust";
+import { processCellsRust } from "./languages/rust";
 import { fixImportsGo, processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
 import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
-import { processCellsNushell as processCellsShell } from './languages/nushell';
+import { processCellsNushell } from './languages/nushell';
 
 export interface Cell {
     index: number;
@@ -81,7 +81,7 @@ export class Kernel {
                     break;
                 case "nushell":
                     lastRunLanguage = "nushell";
-                    output = processCellsShell(cellsStripped);
+                    output = processCellsNushell(cellsStripped);
                     break;
                 default:
                     let response = encoder.encode("Language hasn't been implemented yet");
@@ -122,8 +122,7 @@ export class Kernel {
 
             output.on('close', (_) => {
                 if (!fixingImports) {
-                    // If stdout returned anything consider it a success, even on empty
-                    // response this will still contain !!output-start-cell
+                    // If stdout returned anything consider it a success
                     if (buf.length == 0) {
                         exec.end(false, (new Date).getTime());
                     } else {
@@ -136,4 +135,3 @@ export class Kernel {
         await runProgram;
     }
 }
-

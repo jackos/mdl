@@ -13,7 +13,9 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 	let containsMain = false;
 	let cell_count = 0;
 
-	for (const cell of cells) {
+	for (let cell of cells) {
+		// Remove newlines to avoid logic conflicts
+		cell.contents = cell.contents.trim()
 		cell_count++;
 		innerScope += `\nprintln!("!!output-start-cell");\n`;
 		let lines = cell.contents.split("\n");
@@ -28,6 +30,8 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 
 			if (line.startsWith("#[restart]")) {
 				innerScope = `\nprintln!("!!output-start-cell");\n`.repeat(cell_count);
+				crates = "";
+				outerScope = "";
 				containsMain = false;
 				continue;
 			}
@@ -71,28 +75,27 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
 			containsMain = false;
 		}
 	}
-	// Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr
-	let prelude = `#![allow(dead_code)]\n
-	macro_rules! dbg {
-		() => {
-			::std::println!("[{}:{}]", ::std::file!(), ::std::line!())
-		};
-		($val:expr $(,)?) => {
-			match $val {
-				tmp => {
-					::std::println!("[{}:{}] {} = {:#?}",
-						::std::file!(), ::std::line!(), ::std::stringify!($val), &tmp);
-					tmp
-				}
-			}
-		};
-		($($val:expr),+ $(,)?) => {
-			($(::std::dbg!($val)),+,)
-		};
-	}`
+	// Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr, also stops
+	// the line numbers and file name being printed which we don't want
+	let prelude = `#![allow(unused_macros)]\n
+#![allow(dead_code)]\n
+macro_rules! dbg {
+    ($val:expr $(,)?) => {
+        match $val {
+            tmp => {
+                ::std::println!("{:#?}",
+                        &tmp);
+                tmp
+            }
+        }
+    };
+    ($($val:expr),+ $(,)?) => {
+        ($(dbg!($val)),+,)
+    };
+}`
 	let main = prelude + outerScope + mainFunc + innerScope + "}";
 	let mainFormatted = (outerScope + mainFunc + innerScope + "}")
-	mainFormatted = mainFormatted.replace(/\nprintln!\("!!output-start-cell"\);\n/g, "");
+	mainFormatted = mainFormatted.replace(/\nprintln!\("!!output-start-cell"\);\n/g, "\n");
 	let cargo = '[package]\nname = "output"\nversion = "0.0.1"\nedition="2021"\n[dependencies]\n' + crates;
 
 	mkdirSync(`${tempDir}/rust/src`, { recursive: true });
