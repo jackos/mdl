@@ -10,6 +10,10 @@
 - The output is now saved to standard Markdown
 - Upload to Github to see outputs rendered as you would expect
 
+__Important Note__
+When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then only open `Codebook` when you need it:
+![reopen editor](reopen.png)
+
 ## Description
 Straight nodejs stateless implementation for notebooks with no npm dependencies or external binaries, works with compiled languages.
 
@@ -57,25 +61,20 @@ let x = vec![1, 2, 3];
 
 - [ ] Language Server Support
 
-`Rust-analyzer` does work with hacks around changing line numbers, but it's not reliable enough to release yet.
+`Rust-analyzer` does work by hacking with line numbers and ranges on the server end, but it's not reliable enough to release yet, many things break when creating or moving cells.
 
-
-- If last statement is an expression 
-```rust
-
-```
 
 ### Go         
-[x] Import External Code
-[ ] Language Server Support
+- [x] Import External Code
+- [ ] Language Server Support
 
 ### Javascript 
-[ ] Import External Code
-[x] Language Server Support
+- [ ] Import External Code
+- [x] Language Server Support
 
 ### Typescript 
-[ ] Import External Code
-[x] Language Server Support
+- [ ] Import External Code
+- [x] Language Server Support
 
 ## Inspiration
 - Vimwiki

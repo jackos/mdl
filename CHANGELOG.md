@@ -1,4 +1,8 @@
 # Changelog
+## v0.4.2
+### Misc
+Update readme to show how to set default editor
+
 ## v0.4.1
 ### Bug Fix
 Change to `gopls imports` as this tool is installed by default with VS Code
