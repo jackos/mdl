@@ -1,7 +1,7 @@
 // Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr, also stops
 // the line numbers and file name being printed which we don't want
 export const prelude = `#![allow(unused_macros)]\n
-#![allow(dead_code)]\n
+#![allow(dead_code,unused_imports)]\n
 macro_rules! dbg {
     ($val:expr $(,)?) => {
         match $val {

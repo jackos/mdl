@@ -11,7 +11,7 @@ const kernel = new Kernel();
 export async function activate(context: ExtensionContext) {
   const controller = notebooks.createNotebookController('codebook', 'codebook', 'Codebook');
 
-  controller.supportedLanguages = ['rust', 'go', 'javascript', 'typescript', 'nushell'];
+  controller.supportedLanguages = ['rust', 'go', 'javascript', 'typescript', 'shellscript', 'fish', 'bash', 'nushell', 'json'];
   controller.executeHandler = (cells, doc, ctrl) => {
     if (cells.length > 1) {
       kernel.executeCells(doc, cells, ctrl);

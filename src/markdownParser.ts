@@ -21,6 +21,8 @@ const LANG_IDS = new Map([
 	['rust', 'rust'],
 	['go', 'go'],
 	['nu', 'nushell'],
+	['sh', 'bash'],
+	['fish', 'fish'],
 ]);
 
 const LANG_ABBREVS = new Map(

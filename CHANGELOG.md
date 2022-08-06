@@ -1,4 +1,10 @@
 # Changelog
+## v0.4.0
+### Features
+- Add ability to use a [package] and set up your own `cargo.toml`
+- Add `tokio::main` support
+- Add shell languages
+
 ## v0.3.0
 ### Features
 - Make end statement a dbg! instead of print to print a much larger array of types. 

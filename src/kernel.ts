@@ -4,7 +4,7 @@ import { fixImportsGo, processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
 import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
-import { processCellsNushell } from './languages/nushell';
+import { processShell as processShell } from './languages/nushell';
 
 export interface Cell {
     index: number;
@@ -79,9 +79,21 @@ export class Kernel {
                     lastRunLanguage = "typescript";
                     output = processCellsTypescript(cellsStripped);
                     break;
+                case "bash":
+                    lastRunLanguage = "bash";
+                    output = processShell(cellsStripped, lastRunLanguage);
+                    break;
+                case "fish":
+                    lastRunLanguage = "fish";
+                    output = processShell(cellsStripped, lastRunLanguage);
+                    break;
                 case "nushell":
                     lastRunLanguage = "nushell";
-                    output = processCellsNushell(cellsStripped);
+                    output = processShell(cellsStripped, lastRunLanguage);
+                    break;
+                case "shellscript":
+                    lastRunLanguage = "bash";
+                    output = processShell(cellsStripped, lastRunLanguage);
                     break;
                 default:
                     let response = encoder.encode("Language hasn't been implemented yet");

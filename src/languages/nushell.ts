@@ -1,20 +1,34 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync, chmodSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell } from "../kernel";
+import { Cell, lastRunLanguage } from "../kernel";
 
 let tempDir = getTempPath();
 
-export const processCellsNushell = (cells: Cell[]): ChildProcessWithoutNullStreams => {
+export const processShell = (cells: Cell[], language: string): ChildProcessWithoutNullStreams => {
 	let main = "";
 	for (const cell of cells) {
-		main += `\necho '!!output-start-cell'\n`
+		main += `#!/bin/${language}\necho '!!output-start-cell'\n`
 		main += cell.contents;
 	}
 
-	mkdirSync(`${tempDir}/nu`, { recursive: true });
-	writeFileSync(`${tempDir}/nu/main.nu`, main);
+	let extension = "sh";
+	let runCommand = "bash"
+	switch(language) {
+		case "nushell":
+			extension = "nu";
+			break
+		case "fish":
+			extension = "fish"
+	}
 
-	return spawn('nu', [`${tempDir}/nu/main.nu`]);
+	const pathName = `${tempDir}/shell`
+	const filename = `${pathName}/main.${extension}`
+	mkdirSync(pathName, { recursive: true });
+	writeFileSync(filename, main);
+	chmodSync(filename, 0o755);
+
+	return spawn(extension, [`${filename}`]);
+	// return spawn('cargo', ['run', '--manifest-path', `${tempDir}/rust/Cargo.toml`]);
 };
 

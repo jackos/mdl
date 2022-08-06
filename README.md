@@ -2,11 +2,13 @@
 # Codebook 
 ## Quick Start
 - Open or create a `.md` document
+- Right-click the filename and select `Open With` or `Reopen Editor With...`
+- Select `Codebook`
 - Add a cell
 - Chose your language in the bottom right
 - Run the code and save the document
 - The output is now saved to standard Markdown
-- Upload to Github to see outputs rendered properly
+- Upload to Github to see outputs rendered as you would expect
 
 ## Description
 Straight nodejs stateless implementation for notebooks with no npm dependencies or external binaries, works with compiled languages.
@@ -26,25 +28,60 @@ Press `alt+o` to open up the source code being used to generate outputs, which w
 It's very simple to add your own language, look inside [src/languages/rust.ts](https://github.com/jackos/codebook/blob/main/src/languages/rust.ts) for an example, then add your language to the switch statement in [`src/kernel.ts`](https://github.com/jackos/codebook/blob/main/src/kernel.ts). Please open a pull request if you add a language, it's a lot easier than you might expect and it will be appreciated.
 
 ### Rust       
-- Latency 0.1ms
-- Import External Code
+- [x] Use external code:
+```rust
+use rand::Rng;
+```
+
+- [x] Debug final expression:
+```rust
+let x = vec![1, 2, 3];
+x
+```
+```output
+[1, 2, 3]
+```
+
+Or you can pretty debug by putting a `#` on the front:
+```rust
+let x = vec![1, 2, 3];
+#x
+```
+```output
+[
+    1,
+    2,
+    3,
+]
+```
+
+- [ ] Language Server Support
+
+`Rust-analyzer` does work with hacks around changing line numbers, but it's not reliable enough to release yet.
+
+
+- If last statement is an expression 
+```rust
+
+```
 
 ### Go         
-- Latency 0.1ms
-- Import External Code
+[x] Import External Code
+[ ] Language Server Support
 
 ### Javascript 
-- Latency 0.3ms
-- Language server
+[ ] Import External Code
+[x] Language Server Support
 
 ### Typescript 
-- Latency 0.7ms
-- Language server
+[ ] Import External Code
+[x] Language Server Support
 
 ## Inspiration
 - Vimwiki
 - Jupyter Notebook
 - [This comment](https://news.ycombinator.com/item?id=11042400)
+
 
 
 
