@@ -89,7 +89,7 @@ export let processCellsGo = (cells: Cell[]): ChildProcessWithoutNullStreams => {
 	let mainFile = path.join(dir, 'main.go');
 	mkdirSync(dir, { recursive: true });
 	writeFileSync(mainFile, main);
-	spawnSync('goimports', ['-w', mainFile]);
+	spawnSync('gopls', ['imports', '-w', mainFile]);
 	return spawn('go', ['run', mainFile], { cwd: dir });
 };
 

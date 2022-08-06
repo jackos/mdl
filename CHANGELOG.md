@@ -1,4 +1,8 @@
 # Changelog
+## v0.4.1
+### Bug Fix
+Change to `gopls imports` as this tool is installed by default with VS Code
+
 ## v0.4.0
 ### Features
 - Add ability to use a [package] and set up your own `cargo.toml`
