@@ -2,7 +2,7 @@
 // the line numbers and file name being printed which we don't want
 export const prelude = `#![allow(unused_macros)]\n
 #![allow(dead_code,unused_imports)]\n
-macro_rules! dbg {
+macro_rules! dbg_codebook {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {
@@ -16,11 +16,11 @@ macro_rules! dbg {
     };
 }
 
-macro_rules! dbg_named {
+macro_rules! dbg {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {
-                ::std::println!("{} = {:?}", ::std::stringify!($val), &tmp);
+                ::std::println!("{} = {:#?}", ::std::stringify!($val), &tmp);
 				tmp
             }
         }
@@ -30,7 +30,7 @@ macro_rules! dbg_named {
     };
 }
 
-macro_rules! dbg_pretty {
+macro_rules! dbg_codebook_pretty {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {

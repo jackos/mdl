@@ -1,4 +1,8 @@
 # Changelog
+## v0.4.3
+### Bug Fix
+Run shell commands from directory of the open file
+
 ## v0.4.2
 ### Misc
 Update readme to show how to set default editor

@@ -4,7 +4,7 @@ import { fixImportsGo, processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
 import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
-import { processShell as processShell } from './languages/nushell';
+import { processShell as processShell } from './languages/shell';
 
 export interface Cell {
     index: number;
