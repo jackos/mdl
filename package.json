@@ -6,7 +6,6 @@
   "description": "Execute code blocks in Markdown documents and save the output",
   "main": "./dist/extension.js",
   "icon": "codebook.png",
-  "enabledApiProposals": [],
   "keywords": [
     "notebook",
     "notebooks",
