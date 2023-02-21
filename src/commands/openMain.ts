@@ -3,32 +3,35 @@ import { getTempPath } from '../config';
 import * as path from 'path';
 import { lastRunLanguage } from '../kernel';
 import { spawnSync } from 'child_process';
-import { rename } from 'fs';
+import { rename, rmSync } from 'fs';
 
 export const openMain = async () => {
-    let tempDir = getTempPath();
+    let dir = getTempPath();
     let main: string;
-    let dir = path.join(tempDir, lastRunLanguage);
     switch (lastRunLanguage) {
         case "":
             window.showWarningMessage("No cell has run yet, run a cell before trying to open temp file");
             return;
         case "rust":
             main = path.join(dir, 'src', 'main.rs');
-            let main_formatted = path.join(dir, 'src', 'main-formatted.rs')
-            rename(main_formatted, main, () => { console.log("moved file") });
-            spawnSync('cargo', ['fmt', '--manifest-path', `${tempDir}/rust/Cargo.toml`]);
+            let mainFormatted = path.join(dir, 'src', 'main-formatted.rs');
+            rename(mainFormatted, main, () => { console.log("moved file"); });
+            spawnSync('cargo', ['fmt', '--manifest-path', `${dir}/Cargo.toml`]);
             break;
         case "go":
-            dir = path.join(tempDir, 'go');
             main = path.join(dir, 'main.go');
             break;
+        case "python":
+            main = path.join(dir, 'main.py');
+            break;
+        case "mojo":
+            main = path.join(dir, 'main.mojo');
+            break;
         case "nushell":
-            dir = path.join(tempDir, 'nu');
             main = path.join(dir, 'main.nu');
             break;
         default:
-            window.showErrorMessage("Language not implemented in `src/commands/openMain` please open Github issue");
+            window.showErrorMessage("Language not implemented in `src/commands/openMain`, check folder in your explorer");
             return;
     }
 

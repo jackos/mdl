@@ -1,8 +1,9 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { mkdirSync, writeFileSync, chmodSync } from "fs";
+import { writeFileSync, chmodSync, mkdirSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell, lastRunLanguage } from "../kernel";
+import { Cell } from "../kernel";
 import * as vscode from "vscode";
+import path from "path";
 
 let tempDir = getTempPath();
 
@@ -16,28 +17,31 @@ export const processShell = (cells: Cell[], language: string): ChildProcessWitho
     let main = "";
     for (const cell of cells) {
         main += `#!/bin/${language}\necho '!!output-start-cell'\n`;
-        main += `cd ${dir}\n`;
         main += cell.contents;
     }
 
-    let extension = "sh";
-    let runCommand = "bash";
+    let extension = "";
+    let runner = "";
     switch (language) {
         case "nushell":
             extension = "nu";
+            runner = "nu"
             break;
-        case "fish": ;
+        case "fish":
             extension = "fish";
+            runner = "fish";
+            break;
+        default:
+            extension = "sh";
+            runner = "bash"
+            break;
     }
 
-    // const pathName = `${tempDir}/shell`
-    const filename = `${dir}/mdl.${extension}`;
-    // mkdirSync(pathName, { recursive: true });
+    const filename = path.join(tempDir, `main.${extension}`);
+    mkdirSync(tempDir, { recursive: true });
     writeFileSync(filename, main);
     chmodSync(filename, 0o755);
 
-    return spawn(extension, [`${filename}`]);
-
-    // return spawn('cargo', ['run', '--manifest-path', `${tempDir}/rust/Cargo.toml`]);
+    return spawn(runner, [filename], {cwd: tempDir});
 };
 

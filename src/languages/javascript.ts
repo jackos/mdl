@@ -1,27 +1,27 @@
-
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
 import { Cell } from "../kernel";
+import path from "path";
 
 let tempDir = getTempPath();
 
 export let processCellsJavascript = (cells: Cell[]): ChildProcessWithoutNullStreams => {
-	let innerScope = "";
+    let innerScope = "";
 
-	for (const cell of cells) {
-		innerScope += `\nconsole.log("!!output-start-cell");\n`;
-		let lines = cell.contents.split("\n");
-		for (let line of lines) {
-			line = line.trim();
-			innerScope += line;
-			innerScope += "\n";
-		}
-	};
+    for (const cell of cells) {
+        innerScope += `\nconsole.log("!!output-start-cell");\n`;
+        let lines = cell.contents.split("\n");
+        for (let line of lines) {
+            line = line.trim();
+            innerScope += line;
+            innerScope += "\n";
+        }
+    };
 
-	let mainFile = `${tempDir}/javascript/main.js`;
-	mkdirSync(`${tempDir}/javascript/src`, { recursive: true });
-	writeFileSync(`${tempDir}/javascript/main.js`, innerScope);
+    let mainFile = path.join(tempDir, "main.js");
+    mkdirSync(tempDir, { recursive: true });
+    writeFileSync(mainFile, innerScope);
 
-	return spawn('node', [mainFile]);
+    return spawn('node', [mainFile]);
 };

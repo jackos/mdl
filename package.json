@@ -1,146 +1,141 @@
 {
-    "name": "mdl",
-    "displayName": "mdl",
-    "publisher": "jackos",
-    "version": "0.0.5",
-    "description": "Generate and execute code blocks in Markdown documents from language models",
-    "main": "./dist/extension.js",
-    "icon": "mdl.png",
-    "keywords": [
-        "notebook",
-        "notebooks",
-        "ai",
-        "machine",
-        "learning"
-    ],
-    "activationEvents": [
-        "onNotebook:mdl",
-        "onCommand:mdl.preview"
-    ],
-    "engines": {
-        "vscode": "^1.75.0"
-    },
-    "repository": {
-        "url": "https://github.com/jackos/mdl.ai"
-    },
-    "author": "Jack Clayton",
-    "license": "ISC",
-    "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-            "supported": true
-        }
-    },
-    "contributes": {
-        "configuration": {
-            "type": "object",
-            "title": "mdl configuration",
-            "properties": {
-                "mdl.basePath": {
-                    "description": "Path where searchable notes will be stored",
-                    "type": "string",
-                    "scope": "window"
-                },
-                "mdl.baseFile": {
-                    "description": "The index file that will be opened when searching",
-                    "type": "string",
-                    "scope": "window"
-                }
-            }
-        },
-        "commands": [
-            {
-                "command": "mdl.search",
-                "title": "mdl: Search notes",
-                "description": "Adds notes base path to workspace and opens `find in files`"
-            },
-            {
-                "command": "mdl.openMain",
-                "title": "mdl: Open generated code",
-                "description": "Opens the code being generated in a side tab"
-            }
-        ],
-        "keybindings": [
-            {
-                "key": "alt+f",
-                "command": "mdl.search"
-            },
-            {
-                "key": "alt+o",
-                "command": "mdl.openMain"
-            }
-        ],
-        "languages": [
-            {
-                "id": "chatgpt",
-                "aliases": [
-                    "chatgpt",
-                    "ChatGPT"
-                ],
-                "extensions": [],
-                "firstLine": "^#!.*\\b(chatgpt)\\b",
-                "configuration": "./chatgpt.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "chatgpt",
-                "scopeName": "source.shell.chatgpt",
-                "path": "./chatgpt-syntax.json"
-            }
-        ],
-        "notebooks": [
-            {
-                "type": "mdl",
-                "displayName": "mdl",
-                "priority": "default",
-                "selector": [
-                    {
-                        "filenamePattern": "*.{md,markdown}"
-                    }
-                ]
-            }
-        ],
-        "notebookRenderer": [
-            {
-                "id": "mdl",
-                "displayName": "mdl",
-                "entrypoint": "./dist/extension.js",
-                "mimeTypes": [
-                    "x-application/mdl",
-                    "rust-error"
-                ]
-            }
-        ]
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run package",
-        "compile": "webpack",
-        "watch": "webpack --watch",
-        "package": "webpack --mode production --devtool hidden-source-map",
-        "compile-tests": "tsc -p . --outDir out",
-        "watch-tests": "tsc -p . -w --outDir out",
-        "pretest": "npm run compile-tests && npm run compile && npm run lint",
-        "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js"
-    },
-    "devDependencies": {
-        "@types/glob": "^8.0.1",
-        "@types/mocha": "^10.0.1",
-        "@types/node": "18.x",
-        "@types/vscode": "^1.75.0",
-        "@typescript-eslint/eslint-plugin": "^5.49.0",
-        "@typescript-eslint/parser": "^5.49.0",
-        "@vscode/test-electron": "^2.2.2",
-        "eslint": "^8.33.0",
-        "glob": "^8.1.0",
-        "mocha": "^10.1.0",
-        "ts-loader": "^9.4.2",
-        "typescript": "^4.9.4",
-        "webpack": "^5.75.0",
-        "webpack-cli": "^5.0.1"
-    },
-    "dependencies": {
-        "node-fetch": "^3.3.0"
+  "name": "mdl",
+  "displayName": "mdl",
+  "publisher": "jackos",
+  "version": "0.6.0",
+  "description": "Generate code blocks from AI models, execute code with any language, and save results to markdown",
+  "main": "./dist/extension.js",
+  "icon": "mdl.png",
+  "keywords": [
+    "notebook",
+    "notebooks",
+    "ai",
+    "machine",
+    "learning"
+  ],
+  "activationEvents": [
+    "onNotebook:mdl",
+    "onCommand:mdl.preview"
+  ],
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "repository": {
+    "url": "https://github.com/jackos/mdl.ai"
+  },
+  "author": "Jack Clayton",
+  "license": "ISC",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
     }
+  },
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "mdl configuration",
+      "properties": {
+        "mdl.basePath": {
+          "description": "Path where searchable notes will be stored",
+          "type": "string",
+          "scope": "window"
+        },
+        "mdl.openaiOrgID": {
+          "type": "string",
+          "default": "",
+          "description": "Leave blank if not part of an org, get your org id at https://platform.openai.com/account/org-settings"
+        },
+        "mdl.openaiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Set up an API key at: https://platform.openai.com/account/api-keys"
+        },
+        "mdl.openaiModel": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "description": "Check out available models here: https://platform.openai.com/docs/models/overview"
+        }
+
+      }
+    },
+    "commands": [
+      {
+        "command": "mdl.search",
+        "title": "mdl: Search notes",
+        "description": "Adds notes base path to workspace and opens `find in files`"
+      },
+      {
+        "command": "mdl.openMain",
+        "title": "mdl: Open generated code",
+        "description": "Opens the code being generated, by adding the folder to the workspace"
+      },
+      {
+        "command": "mdl.deleteTemp",
+        "title": "mdl: Delete Tempory Folder",
+        "description": "Delete the temporary folder with all the generated code files"
+      }
+    ],
+    "keybindings": [
+      {
+        "key": "alt+f",
+        "command": "mdl.search"
+      },
+      {
+        "key": "alt+o",
+        "command": "mdl.openMain"
+      }
+    ],
+    "languages": [
+      {
+        "id": "openai",
+        "aliases": [
+          "OpenAI",
+          "openai"
+        ],
+        "extensions": [ ],
+        "firstLine": "^#!.*\\b(openai)\\b"
+      }
+    ],
+    "notebooks": [
+      {
+        "type": "mdl",
+        "displayName": "mdl",
+        "priority": "default",
+        "selector": [
+          {
+            "filenamePattern": "*.{md,markdown}"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "compile": "node ./build.mjs",
+    "watch": "node ./watch.mjs",
+    "vscode:prepublish": "node ./build.mjs"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.82.0",
+    "@types/vscode-notebook-renderer": "^1.72.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "@vscode/test-electron": "^2.3.4",
+    "esbuild": "^0.19.3",
+    "eslint": "^8.50.0",
+    "glob": "^10.3.6",
+    "mocha": "^10.2.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
 }

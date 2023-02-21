@@ -2,16 +2,17 @@ import { parseMarkdown, writeCellsToMarkdown, RawNotebookCell } from './markdown
 import { searchNotes } from './commands/search';
 import { Kernel } from './kernel';
 import {
-    window, notebooks, commands, workspace, ExtensionContext,
-    CancellationToken, NotebookSerializer, NotebookData, NotebookCellData, languages, DocumentFormattingEditProvider, DocumentRangeFormattingEditProvider, TextEdit, TextDocument
+    notebooks, commands, workspace, ExtensionContext,
+    CancellationToken, NotebookSerializer, NotebookData, NotebookCellData 
 } from 'vscode';
 import { openMain } from './commands/openMain';
+import { getTempPath } from './config';
+import { rmSync } from 'fs';
 
 const kernel = new Kernel();
 export async function activate(context: ExtensionContext) {
     const controller = notebooks.createNotebookController('mdl', 'mdl', 'mdl');
-
-    controller.supportedLanguages = ['rust', 'go', 'javascript', 'typescript', 'shellscript', 'fish', 'bash', 'nushell', 'json', 'plaintext', 'chatgpt'];
+    controller.supportedLanguages = ['rust', 'go', 'javascript', 'typescript', 'shellscript', 'fish', 'bash', 'nushell', 'json', 'plaintext', 'openai', 'python', 'mojo'];
     controller.executeHandler = (cells, doc, ctrl) => {
         if (cells.length > 1) {
             kernel.executeCells(doc, cells, ctrl);
@@ -19,11 +20,10 @@ export async function activate(context: ExtensionContext) {
             kernel.executeCell(doc, cells, ctrl);
         }
     };
-    context.subscriptions.push(commands.registerCommand('mdl.kernel.restart', () => {
-        window.showInformationMessage('Restarting kernel');
-    }));
     context.subscriptions.push(commands.registerCommand('mdl.search', searchNotes));
     context.subscriptions.push(commands.registerCommand('mdl.openMain', openMain));
+    context.subscriptions.push(commands.registerCommand('mdl.deleteTemp', () => rmSync(getTempPath(), { recursive: true, force: true })
+));
 
     const notebookSettings = {
         transientOutputs: false,

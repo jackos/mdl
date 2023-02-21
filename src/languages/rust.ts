@@ -124,7 +124,7 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
         crates += `tokio = { version = "*", features = ["full"] }\n`;
     }
     outerScope = '#![allow(clippy::all, unused)]\nmod macros;' + outerScope;
-    innerScope = 'std::env::set_current_dir("${workingDir}").ok();' + innerScope;
+    innerScope = `\n    std::env::set_current_dir("${workingDir}").ok();` + innerScope;
 
     let main = outerScope + mainFunc + innerScope + "    Ok(())\n}";
 
@@ -134,10 +134,11 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
         cargo = '[package]\nname = "output"\nversion = "0.0.1"\nedition="2021"\n[dependencies]\n' + crates;
     }
 
-    mkdirSync(`${tempDir} /rust/src`, { recursive: true });
-    writeFileSync(`${tempDir} /rust/src/macros.rs`, macros);
-    writeFileSync(`${tempDir} /rust/src/main.rs`, main);
-    writeFileSync(`${tempDir} /rust/src/main-formatted.rs`, mainFormatted);
-    writeFileSync(`${tempDir} /rust/Cargo.toml`, cargo);
-    return spawn('cargo', ['run', '--all-features', '--manifest-path', `${tempDir} /rust/Cargo.toml`]);
+    console.log(`main file: ${tempDir}/rust/src/main.rs`);
+    mkdirSync(`${tempDir}/rust/src`, { recursive: true });
+    writeFileSync(`${tempDir}/rust/src/macros.rs`, macros);
+    writeFileSync(`${tempDir}/rust/src/main.rs`, main);
+    writeFileSync(`${tempDir}/rust/src/main-formatted.rs`, mainFormatted);
+    writeFileSync(`${tempDir}/rust/Cargo.toml`, cargo);
+    return spawn('cargo', ['run', '--all-features', '--manifest-path', `${tempDir}/rust/Cargo.toml`]);
 };

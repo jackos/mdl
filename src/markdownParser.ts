@@ -23,7 +23,7 @@ const LANG_IDS = new Map([
     ['nu', 'nushell'],
     ['sh', 'bash'],
     ['fish', 'fish'],
-    ['chatgpt', 'chatgpt'],
+    ['openai', 'openai'],
 ]);
 
 const LANG_ABBREVS = new Map(
