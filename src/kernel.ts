@@ -3,8 +3,9 @@ import { processCellsRust } from "./languages/rust";
 import { fixImportsGo, processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
-import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawn, spawnSync } from 'child_process';
 import { processShell as processShell } from './languages/shell';
+import fetch from 'node-fetch';
 
 export interface Cell {
     index: number;
@@ -50,10 +51,22 @@ export class Kernel {
             }
         }
 
+
+        const lang = cells[0].document.languageId;
+        if (lang === "chatgpt") {
+            let json = await fetch('google.com', {
+                method: "POST",
+                body: JSON.stringify({
+                    "clientId": "67927a32-d9e6-4e48-9619-cb71a43362cd",
+                    "clientSecret": "IgRee9GeDi5Gmu6x66kb7CCe6zNPAr9TH4PaciGF5y6yLMvT2C",
+                }),
+            }).then((response) => response.json());
+            exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(json as string)])]);
+        }
+
         const runProgram = new Promise((resolve, _) => {
             let output: ChildProcessWithoutNullStreams;
-            const lang = cells[0].document.languageId
-            const mimeType = `text/plain`
+            const mimeType = `text/plain`;
             switch (lang) {
                 case "rust":
                     lastRunLanguage = "rust";
@@ -110,7 +123,7 @@ export class Kernel {
             });
 
             let fixingImports = false;
-            let currentCell = cellsStripped.pop();
+            let currentCell = cellsStripped.pop() as Cell;
             let errorText = "";
 
             output.stderr.on("data", async (data: Uint8Array) => {
@@ -119,7 +132,7 @@ export class Kernel {
                     await fixImportsGo(exec, currentCell.cell);
                 }
                 errorText = data.toString();
-                exec.appendOutput([new NotebookCellOutput([NotebookCellOutputItem.text(errorText, mimeType)])])
+                exec.appendOutput([new NotebookCellOutput([NotebookCellOutputItem.text(errorText, mimeType)])]);
             });
 
             let buf = Buffer.from([]);
@@ -127,15 +140,14 @@ export class Kernel {
                 let arr = [buf, data];
                 buf = Buffer.concat(arr);
                 let outputs = decoder.decode(buf).split("!!output-start-cell\n");
-                let currentCellOutput = outputs[currentCell.index]
-                // currentCellOutput += errorText;
-                exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])])
+                let currentCellOutput = outputs[currentCell.index];
+                exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])]);
             });
 
             output.on('close', (_) => {
                 if (!fixingImports) {
                     // If stdout returned anything consider it a success
-                    if (buf.length == 0) {
+                    if (buf.length === 0) {
                         exec.end(false, (new Date).getTime());
                     } else {
                         exec.end(true, (new Date).getTime());

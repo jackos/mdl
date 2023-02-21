@@ -1,8 +1,7 @@
 // Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr, also stops
 // the line numbers and file name being printed which we don't want
-export const prelude = `#![allow(unused_macros)]\n
-#![allow(dead_code,unused_imports)]\n
-macro_rules! dbg_codebook {
+export const prelude = `#[macro_export]
+macro_rules! dbg_mdl {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {
@@ -16,6 +15,7 @@ macro_rules! dbg_codebook {
     };
 }
 
+#[macro_export]
 macro_rules! dbg {
     ($val:expr $(,)?) => {
         match $val {
@@ -30,7 +30,8 @@ macro_rules! dbg {
     };
 }
 
-macro_rules! dbg_codebook_pretty {
+#[macro_export]
+macro_rules! dbg_mdl_pretty {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {
@@ -43,4 +44,5 @@ macro_rules! dbg_codebook_pretty {
         ($(dbg_pretty!($val)),+,)
     };
 }
+
 `

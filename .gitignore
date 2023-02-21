@@ -1,5 +1,5 @@
-node_modules
+out
 dist
-scratch.js
+node_modules
+.vscode-test/
 *.vsix
-.vscode
