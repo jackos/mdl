@@ -86,11 +86,14 @@ let post = async (url, headers, body): Promise<ChatResponse> => {
     }
 }
 
+// Kernel in this case matches Jupyter definition i.e. this is responsible for taking the frontend notebook
+// and running it through different languages, then returning results in the same format.
 export class Kernel {
+    exec_all = false
     // Use the same code for Run All, just takes the last cell
     async executeCells(doc: NotebookDocument, cells: NotebookCell[], ctrl: NotebookController): Promise<void> {
-        for (const cell of cells) {
-            this.executeCell(doc, [cell], ctrl);
+        for(const cell of cells) {
+            await this.executeCell(doc, [cell], ctrl)
         }
     }
 
@@ -98,6 +101,14 @@ export class Kernel {
         let decoder = new TextDecoder;
         let encoder = new TextEncoder;
         let exec = ctrl.createNotebookCellExecution(cells[0]);
+
+        let currentCell = cells[cells.length - 1];
+
+        // Allow for the ability to cancel execution
+        let token = exec.token;
+        token.onCancellationRequested(() => {
+            exec.end(false, (new Date).getTime());
+        });
 
         // Used for the cell timer counter
         exec.start((new Date).getTime());
@@ -121,8 +132,13 @@ export class Kernel {
             }
         }
 
+        // Get language that was used to run this cell
         const lang = cells[0].document.languageId;
 
+        // Check if clearing output at the end
+        let clearOutput = false;
+
+        // AI Model related, generates new code blocks, may expand this later
         if (lang === "openai") {
             lastRunLanguage = "openai";
             const url = 'https://api.openai.com/v1/chat/completions';
@@ -176,11 +192,18 @@ export class Kernel {
             edit.set(cells[0].notebook.uri, [notebook_edit]);
             workspace.applyEdit(edit);
             exec.end(true, (new Date).getTime());
+
+        // Normal language related execution
         } else {
             let output: ChildProcessWithoutNullStreams;
 
+            // Now there's an output stream, kill that as well on cancel request
+            token.onCancellationRequested(() => {
+                output.kill();
+                exec.end(false, (new Date).getTime());
+            });
+
             const mimeType = `text/plain`;
-            let currentCell = cellsStripped[cellsStripped.length - 1] as Cell;
             switch (lang) {
                 case "mojo":
                     if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
@@ -188,7 +211,9 @@ export class Kernel {
                         return
                     }
                     lastRunLanguage = "mojo";
-                    output = processCellsMojo(cellsStripped);
+                    let mojoResult = processCellsMojo(cellsStripped);
+                    output = mojoResult.stream
+                    clearOutput = mojoResult.clearOutput
                     break;
                 case "rust":
                     if (commandNotOnPath('cargo', "https://rustup.rs")) {
@@ -212,7 +237,9 @@ export class Kernel {
                         return
                     }
                     lastRunLanguage = "python";
-                    output = processCellsPython(cellsStripped);
+                    let pyResult = processCellsPython(cellsStripped);
+                    output = pyResult.stream
+                    clearOutput = pyResult.clearOutput
                     break;
                 case "javascript":
                     if (commandNotOnPath("node", "https://nodejs.org/en/download/package-manager")) {
@@ -235,34 +262,52 @@ export class Kernel {
                     output = processCellsTypescript(cellsStripped);
                     break;
                 case "bash":
-                    lastRunLanguage = "bash";
-                    output = processShell(currentCell, lastRunLanguage);
+                    if (commandNotOnPath("bash", "https://hackernoon.com/how-to-install-bash-on-windows-10-lqb73yj3")) {
+                        exec.end(false, (new Date).getTime());
+                        return
+                    }
+                    lastRunLanguage = "shell";
+                    output = processShell(currentCell, "bash");
+                    break;
+                case "zsh":
+                    if (commandNotOnPath("zsh", "https://github.com/ohmyzsh/ohmyzsh/wiki/Installing-ZSH")) {
+                        exec.end(false, (new Date).getTime());
+                        return
+                    }
+                    lastRunLanguage = "shell";
+                    output = processShell(currentCell, "zsh");
                     break;
                 case "fish":
-                    lastRunLanguage = "fish";
-                    output = processShell(currentCell, lastRunLanguage);
+                    if (commandNotOnPath("fish", "https://fishshell.com/")) {
+                        exec.end(false, (new Date).getTime());
+                        return
+                    }
+                    lastRunLanguage = "shell";
+                    output = processShell(currentCell, "fish");
                     break;
                 case "nushell":
-                    lastRunLanguage = "nushell";
-                    output = processShell(currentCell, lastRunLanguage);
+                    if (commandNotOnPath("nushell", "https://www.nushell.sh/book/installation.html")) {
+                        exec.end(false, (new Date).getTime());
+                        return
+                    }
+                    lastRunLanguage = "shell";
+                    output = processShell(currentCell, "nushell");
                     break;
                 case "shellscript":
-                    lastRunLanguage = "bash";
-                    output = processShell(currentCell, lastRunLanguage);
+                    if (commandNotOnPath("bash", "https://hackernoon.com/how-to-install-bash-on-windows-10-lqb73yj3")) {
+                        exec.end(false, (new Date).getTime());
+                        return
+                    }
+                    lastRunLanguage = "shell";
+                    output = processShell(currentCell, "shellscript");
                     break;
                 default:
-                    let response = encoder.encode("Language hasn't been implemented yet");
-                    const x = new NotebookCellOutputItem(response, mimeType);
-                    exec.appendOutput([new NotebookCellOutput([x])], cells[0]);
-                    exec.end(false, (new Date).getTime());
+                    // let response = encoder.encode("Language hasn't been implemented yet");
+                    // const x = new NotebookCellOutputItem(response, mimeType);
+                    // exec.appendOutput([new NotebookCellOutput([x])], cells[0]);
+                    exec.end(true, (new Date).getTime());
                     return;
             }
-            // Allow for the ability to cancel execution
-            let token = exec.token;
-            token.onCancellationRequested(() => {
-                output.kill();
-                exec.end(false, (new Date).getTime());
-            });
 
             let fixingImports = false;
             let errorText = "";
@@ -273,12 +318,22 @@ export class Kernel {
             });
 
             let buf = Buffer.from([]);
+
+            let currentCellNew = cellsStripped[cellsStripped.length - 1] as Cell;
+
             output.stdout.on('data', (data: Uint8Array) => {
                 let arr = [buf, data];
                 buf = Buffer.concat(arr);
                 let outputs = decoder.decode(buf).split("!!output-start-cell\n");
-                let currentCellOutput = outputs[currentCell.index];
-                exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])]);
+                let currentCellOutput: string
+                if(lastRunLanguage == "shell"){
+                    currentCellOutput = outputs[1]
+                } else {
+                    currentCellOutput = outputs[currentCellNew.index];
+                }
+                if(!clearOutput) {
+                    exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])]);
+                }
             });
 
             output.on('close', (_) => {

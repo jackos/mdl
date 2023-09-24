@@ -4,10 +4,24 @@ import { getTempPath } from "../config";
 import { Cell } from "../kernel";
 import * as vscode from "vscode";
 import path from "path";
+import { NotebookCell } from "vscode";
 
 let tempDir = getTempPath();
 
-export const processShell = (cell: Cell, language: string): ChildProcessWithoutNullStreams => {
+export const processShell = (cell: NotebookCell, language: string): ChildProcessWithoutNullStreams => {
+    let prog = ""
+    switch(language){
+        case "nushell":
+            prog = "nu";
+            break;
+        case "fish":
+            prog = "fish";
+            break;
+        default:
+            prog = "bash";
+            break;
+    }
+
     let fileName = vscode.window.activeTextEditor?.document.fileName as string;
     // Get directory by slicing off last slash
     let dir = fileName.substring(0, fileName.lastIndexOf("/"));
@@ -16,35 +30,19 @@ export const processShell = (cell: Cell, language: string): ChildProcessWithoutN
     }
     let main = "";
     // Ignore all the clutter from the generated files when running tree
-    let contents = cell.contents.trim();
+    let contents = cell.document.getText().trim();
     if (contents.endsWith("tree")) {
         contents = "tree -I '__pycache__|main.sh|main.fish|main.nu|target'"
     }
     main += `#!/bin/${language}\necho '!!output-start-cell'\n`;
     main += contents;
 
-    let extension = "";
-    let runner = "";
-    switch (language) {
-        case "nushell":
-            extension = "nu";
-            runner = "nu"
-            break;
-        case "fish":
-            extension = "fish";
-            runner = "fish";
-            break;
-        default:
-            extension = "sh";
-            runner = "bash"
-            break;
-    }
 
-    const filename = path.join(tempDir, `main.${extension}`);
+    const filename = path.join(tempDir, `main`);
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(filename, main);
     chmodSync(filename, 0o755);
 
-    return spawn(runner, [filename], {cwd: tempDir});
+    return spawn(prog, [filename], {cwd: tempDir});
 };
 

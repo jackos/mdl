@@ -12,7 +12,22 @@ import { rmSync } from 'fs';
 const kernel = new Kernel();
 export async function activate(context: ExtensionContext) {
     const controller = notebooks.createNotebookController('md-notebook', 'md-notebook', 'md-notebook');
-    controller.supportedLanguages = ['rust', 'go', 'javascript', 'typescript', 'shellscript', 'fish', 'bash', 'nushell', 'json', 'plaintext', 'openai', 'python', 'mojo'];
+    controller.supportedLanguages = [
+        'rust', 
+        'go', 
+        'javascript', 
+        'typescript', 
+        'shellscript', 
+        'fish', 
+        'bash', 
+        'nushell', 
+        'zsh',
+        'json', 
+        'plaintext', 
+        'openai', 
+        'python', 
+        'mojo'
+    ];
     controller.executeHandler = (cells, doc, ctrl) => {
         if (cells.length > 1) {
             kernel.executeCells(doc, cells, ctrl);

@@ -2,17 +2,20 @@
 
 ## v0.6.1
 
-### Small Enhancements
+### Features
 
-- Make tree ignore `__pycache__` and other generated files
-- Ignore whitespace when checking for first comment with `# file:` in python files 
+- Add ability to clear output in Mojo and Python
 - Add the `# file:` to generate file feature to Mojo
-- For shell scripts, just run a single cell not every previous cell as well
+- In shells `tree` ignore `__pycache__` and other generated files
 
 ### Bug Fixes
 
+- For shell scripts, just run a single cell not every previous cell as well
+- Ignore whitespace when checking for first comment with `# file:` in python files 
 - Writing files was causing mulitple prints when importing another module
-- Fix up both parsing from and too markdown, trim cells and get whitepace right
+- Fix parsing to and from markdown, trim cells and get whitepace right
+- Make cancellation of running cell always work
+- Fix `Run all cells`
 
 ## v0.6.0
 

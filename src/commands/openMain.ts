@@ -27,8 +27,8 @@ export const openMain = async () => {
         case "mojo":
             main = path.join(dir, 'main.mojo');
             break;
-        case "nushell":
-            main = path.join(dir, 'main.nu');
+        case "shell":
+            main = path.join(dir, 'main');
             break;
         default:
             window.showErrorMessage("Language not implemented in `src/commands/openMain`, check folder in your explorer");

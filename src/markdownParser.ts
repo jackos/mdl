@@ -23,6 +23,7 @@ const LANG_IDS = new Map([
     ['nu', 'nushell'],
     ['sh', 'bash'],
     ['fish', 'fish'],
+    ['zsh', 'zsh'],
     ['openai', 'openai'],
 ]);
 

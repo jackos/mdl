@@ -7,9 +7,10 @@ import {window} from "vscode";
 
 let tempDir = getTempPath();
 
-export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams => {
+export let processCellsMojo = (cells: Cell[]): {stream: ChildProcessWithoutNullStreams, clearOutput: boolean} => {
     let innerScope = "";
     let cellCount = 0;
+    let clearOutput = false;
 
     for (const cell of cells) {
         cell.contents = cell.contents.trim();
@@ -37,13 +38,19 @@ export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams =>
                 }
                 continue
             }
-            if (line.trim() == "from python import Python") {
-                continue
+            if(i == 1) {
+                if (line.startsWith("# clear-output")) {
+                    clearOutput = true
+                }
             }
-            if (line.startsWith("fn main():") || line.startsWith("def main():")) {
+            if (
+                line.startsWith("fn main():") ||
+                line.startsWith("def main():") ||
+                line.includes('Python.import_module("sys")') || 
+                line.trim() == "from python import Python"
+            ){
                 continue;
             }
-
             if (line[0] !== " " && i == len && !line.includes("#") && line.trim().split(" ").length == 1 && !line.endsWith(")")) {
                 // if first char is `!` pretty print
                 if (line[0] === "!") {
@@ -65,5 +72,5 @@ export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams =>
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
 
-    return spawn('mojo', [mainFile]);
+    return {stream: spawn('mojo', [mainFile]), clearOutput};
 };
