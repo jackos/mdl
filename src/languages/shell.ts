@@ -16,9 +16,16 @@ export const processShell = (cells: Cell[], language: string): ChildProcessWitho
     }
     let main = "";
     for (const cell of cells) {
+        // Ignore all the clutter from the generated files when running tree
+        let contents = cell.contents.trim();
+        if (contents.endsWith("tree")) {
+            contents = "tree -I '__pycache__|main.sh|main.fish|main.nu|target'"
+        }
         main += `#!/bin/${language}\necho '!!output-start-cell'\n`;
-        main += cell.contents;
+        main += contents;
     }
+
+    vscode.window.showErrorMessage(main.trim())
 
     let extension = "";
     let runner = "";

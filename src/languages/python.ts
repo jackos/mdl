@@ -21,8 +21,7 @@ export let processCellsPython = (cells: Cell[]): ChildProcessWithoutNullStreams 
         let i = 0
         for (let line of lines) {
             i++
-            if (line.startsWith("# file:")) {
-                window.showInformationMessage("Writing new file:" + line.split(":")[1].trim());
+            if (i==1 && line.replace(/\s/g, "").substring(0, 6) == "#file:") {
                 writeAdditionalFile = line.split(":")[1].trim()
             }
             if (line.length > 0 && line[0] !== " " && line[line.length - 1] != ")" && i == len && !line.includes("#")) {

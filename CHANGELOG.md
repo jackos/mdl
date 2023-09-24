@@ -1,4 +1,13 @@
+
 # Changelog
+
+## v0.6.1
+
+### Small Enhancements
+
+- Make tree ignore `__pycache__` and other generated files
+- Ignore whitespace when checking for first comment with `# file:` in python files 
+- Add the `# file:` to generate file feature to Mojo
 
 ## v0.6.0
 
@@ -127,3 +136,5 @@
 ### Features
 
 Working notebook with Rust, Go, Javascript and Typescript
+
+

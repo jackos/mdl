@@ -1,3 +1,4 @@
+
 # md-notebook
 
 Generate AI code blocks into a notebook, and execute them locally through many different languages.
@@ -14,20 +15,19 @@ Generate AI code blocks into a notebook, and execute them locally through many d
 ## OpenAI Code Generation
 
 - Set your OpenAI key with the setting `md-notebook: openai key`
-- Default model is gpt-3.5-turbo, change it with `mdl: openai model`
+- Default model is gpt-3.5-turbo, change the setting with `md-notebook: openai model`
 - Select `openai` as your language in the bottom right
 - Ask it to show you how to do something in one of the supported lanuages
 - Run the code blocks it generates for you
 
 __Important Note__
-When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then only open `mdl` when you need it:
-![reopen editor](reopen.png)
+When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then only open `md-notebook` when you need it.
 
 ## Description
 
-Straight nodejs stateless implementation for notebooks with no npm dependencies or external binaries, works with compiled languages.
+Straight nodejs stateless implementation for notebooks with no external binaries, kernels or npm runtime dependencies other than nodejs and vscode, works with compiled languages.
 
-Rather than using complicated kernels, it simply spawns a process that runs your local toolchain for the language you're using and, returning the output and saving it to markdown.
+Rather than using complicated kernels, it simply spawns a process that runs your local toolchain for the language you're using, and returns the output. When you save the file it's standard markdown so you can use it for static site generators or upload to github.
 
 ## Keybindings
 

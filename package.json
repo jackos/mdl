@@ -2,16 +2,16 @@
   "name": "md-notebook",
   "displayName": "md-notebook",
   "publisher": "jackos",
-  "version": "0.6.0",
-  "description": "Execute code with any language in a notebook, source code is markdown, and generate code blocks with AI models",
+  "version": "0.6.1",
+  "description": "Execute code with any language in a notebook, source code is saved as markdown, and generate code blocks with AI models",
   "main": "./dist/extension.js",
   "icon": "md-notebook.png",
   "keywords": [
+    "md",
+    "markdown",
     "notebook",
     "notebooks",
-    "ai",
-    "machine",
-    "learning"
+    "jupyter"
   ],
   "activationEvents": [
     "onNotebook:md-notebook",
@@ -21,7 +21,7 @@
     "vscode": "^1.82.0"
   },
   "repository": {
-    "url": "https://github.com/jackos/md-notebook.ai"
+    "url": "https://github.com/jackos/md-notebook"
   },
   "author": "Jack Clayton",
   "license": "ISC",

@@ -15,7 +15,16 @@ fn main() {
 ```output
 The sum is 12
 ```
+```mojo
+#file: cool.mojo
+
+print("wow sweet one")
+```
+```output
+wow sweet one
+```
 
 This `add` function has a descriptive name, and it's clear from the parameter list and the return type that the function adds two i32 integers together.
+
 
 
