@@ -1,7 +1,7 @@
 // Add a macro to send dbg to stdout so the output doesn't get out of sync with stderr, also stops
 // the line numbers and file name being printed which we don't want
 export const prelude = `#[macro_export]
-macro_rules! dbg_mdl {
+macro_rules! dbg_mdnotebook {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {
@@ -31,7 +31,7 @@ macro_rules! dbg {
 }
 
 #[macro_export]
-macro_rules! dbg_mdl_pretty {
+macro_rules! dbg_mdnotebook_pretty {
     ($val:expr $(,)?) => {
         match $val {
             tmp => {

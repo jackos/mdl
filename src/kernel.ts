@@ -6,7 +6,6 @@ import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
 import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
 import { processShell as processShell } from './languages/shell';
-import fetch from 'node-fetch';
 import { processCellsPython } from './languages/python';
 import * as vscode from 'vscode';
 import { processCellsMojo } from './languages/mojo';
@@ -136,7 +135,7 @@ export class Kernel {
             if (orgId) {
                 headers['OpenAI-Organization'] = orgId
             }
-            const messages: ChatMessage[] = [{ role: "system", content: "You are a helpful bot named mdl, that generates concise code blocks to solve programming problems" }];
+            const messages: ChatMessage[] = [{ role: "system", content: "You are a helpful bot named md-notebook, that generates concise code blocks to solve programming problems" }];
             for (const message of cellsStripped) {
                 messages.push({ role: "user", content: message.contents });
             }

@@ -1,11 +1,11 @@
 {
-  "name": "mdl",
-  "displayName": "mdl",
+  "name": "md-notebook",
+  "displayName": "md-notebook",
   "publisher": "jackos",
   "version": "0.6.0",
-  "description": "Generate code blocks from AI models, execute code with any language, and save results to markdown",
+  "description": "Execute code with any language in a notebook, source code is markdown, and generate code blocks with AI models",
   "main": "./dist/extension.js",
-  "icon": "mdl.png",
+  "icon": "md-notebook.png",
   "keywords": [
     "notebook",
     "notebooks",
@@ -14,14 +14,14 @@
     "learning"
   ],
   "activationEvents": [
-    "onNotebook:mdl",
-    "onCommand:mdl.preview"
+    "onNotebook:md-notebook",
+    "onCommand:md-notebook.preview"
   ],
   "engines": {
     "vscode": "^1.82.0"
   },
   "repository": {
-    "url": "https://github.com/jackos/mdl.ai"
+    "url": "https://github.com/jackos/md-notebook.ai"
   },
   "author": "Jack Clayton",
   "license": "ISC",
@@ -34,24 +34,24 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "mdl configuration",
+      "title": "md-notebook configuration",
       "properties": {
-        "mdl.basePath": {
+        "md-notebook.basePath": {
           "description": "Path where searchable notes will be stored",
           "type": "string",
           "scope": "window"
         },
-        "mdl.openaiOrgID": {
+        "md-notebook.openaiOrgID": {
           "type": "string",
           "default": "",
           "description": "Leave blank if not part of an org, get your org id at https://platform.openai.com/account/org-settings"
         },
-        "mdl.openaiKey": {
+        "md-notebook.openaiKey": {
           "type": "string",
           "default": "",
           "description": "Set up an API key at: https://platform.openai.com/account/api-keys"
         },
-        "mdl.openaiModel": {
+        "md-notebook.openaiModel": {
           "type": "string",
           "default": "gpt-3.5-turbo",
           "description": "Check out available models here: https://platform.openai.com/docs/models/overview"
@@ -61,29 +61,29 @@
     },
     "commands": [
       {
-        "command": "mdl.search",
-        "title": "mdl: Search notes",
+        "command": "md-notebook.search",
+        "title": "md-notebook: Search notes",
         "description": "Adds notes base path to workspace and opens `find in files`"
       },
       {
-        "command": "mdl.openMain",
-        "title": "mdl: Open generated code",
+        "command": "md-notebook.openMain",
+        "title": "md-notebook: Open generated code",
         "description": "Opens the code being generated, by adding the folder to the workspace"
       },
       {
-        "command": "mdl.deleteTemp",
-        "title": "mdl: Delete Tempory Folder",
+        "command": "md-notebook.deleteTemp",
+        "title": "md-notebook: Delete Tempory Folder",
         "description": "Delete the temporary folder with all the generated code files"
       }
     ],
     "keybindings": [
       {
         "key": "alt+f",
-        "command": "mdl.search"
+        "command": "md-notebook.search"
       },
       {
         "key": "alt+o",
-        "command": "mdl.openMain"
+        "command": "md-notebook.openMain"
       }
     ],
     "languages": [
@@ -99,8 +99,8 @@
     ],
     "notebooks": [
       {
-        "type": "mdl",
-        "displayName": "mdl",
+        "type": "md-notebook",
+        "displayName": "md-notebook",
         "priority": "default",
         "selector": [
           {
@@ -134,8 +134,5 @@
     "glob": "^10.3.6",
     "mocha": "^10.2.0",
     "typescript": "^5.2.2"
-  },
-  "dependencies": {
-    "node-fetch": "^3.3.2"
   }
 }

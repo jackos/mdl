@@ -87,9 +87,9 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
                         if (line.length > 0 && line[line.length - 1] !== ";" && line[line.length - 1] !== "}") {
                             // if first char is `#` pretty print
                             if (line[0] === "#") {
-                                line = "dbg_mdl_pretty!(&" + line.substring(1) + ");";
+                                line = "dbg_mdnotebook_pretty!(&" + line.substring(1) + ");";
                             } else {
-                                line = "dbg_mdl!(&" + line + ");";
+                                line = "dbg_mdnotebook!(&" + line + ");";
                             }
                         }
 

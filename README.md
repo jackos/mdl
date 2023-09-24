@@ -1,4 +1,4 @@
-# mdl
+# md-notebook
 
 Generate AI code blocks into a notebook, and execute them locally through many different languages.
 
@@ -13,7 +13,7 @@ Generate AI code blocks into a notebook, and execute them locally through many d
 
 ## OpenAI Code Generation
 
-- Set your OpenAI key with the setting `mdl: openai key`
+- Set your OpenAI key with the setting `md-notebook: openai key`
 - Default model is gpt-3.5-turbo, change it with `mdl: openai model`
 - Select `openai` as your language in the bottom right
 - Ask it to show you how to do something in one of the supported lanuages
