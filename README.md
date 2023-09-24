@@ -1,4 +1,3 @@
-
 # md-notebook
 
 Generate AI code blocks into a notebook, and execute them locally through many different languages.
@@ -12,20 +11,19 @@ Generate AI code blocks into a notebook, and execute them locally through many d
 - The output is now saved to standard Markdown
 - Upload to Github to see outputs rendered as you would expect
 
-## OpenAI Code Generation
+__Important Note__
+When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then reopen wth `md-notebook` only when you need it.
 
-- Set your OpenAI key with the setting `md-notebook: openai key`
-- Default model is gpt-3.5-turbo, change the setting with `md-notebook: openai model`
+## OpenAI Code Generation
+- [Set up an OpenAI key here](https://platform.openai.com/account/api-keys) and change the setting: `md-notebook: openai key`
+- Default model is `gpt-3.5-turbo`, change the setting with `md-notebook: openai model` e.g. `gpt-4`
 - Select `openai` as your language in the bottom right
 - Ask it to show you how to do something in one of the supported lanuages
 - Run the code blocks it generates for you
 
-__Important Note__
-When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then only open `md-notebook` when you need it.
-
 ## Description
 
-Straight nodejs stateless implementation for notebooks with no external binaries, kernels or npm runtime dependencies other than nodejs and vscode, works with compiled languages.
+Straight nodejs stateless implementation for notebooks with no external binaries, kernels or extra npm runtime dependencies, works with compiled languages.
 
 Rather than using complicated kernels, it simply spawns a process that runs your local toolchain for the language you're using, and returns the output. When you save the file it's standard markdown so you can use it for static site generators or upload to github.
 
@@ -62,35 +60,6 @@ Generates code blocks which you can then run
 ### Rust
 
 - [x] Use external code:
-
-```rust
-use rand::Rng;
-```
-
-- [x] Debug final expression:
-
-```rust
-let x = vec![1, 2, 3];
-x
-```
-```output
-[1, 2, 3]
-```
-
-Or you can pretty debug by putting a `#` on the front:
-
-```rust
-let x = vec![1, 2, 3];
-#x
-```
-```output
-[
-    1,
-    2,
-    3,
-]
-```
-
 - [ ] Language Server Support
 
 `Rust-analyzer` does work by hacking with line numbers and ranges on the server end, but it's not reliable enough to release.
@@ -121,4 +90,3 @@ let x = vec![1, 2, 3];
 - Jupyter Notebook
 - [This comment](https://news.ycombinator.com/item?id=11042400)
 - Vimwiki
-

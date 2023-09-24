@@ -7,7 +7,7 @@ import path from "path";
 
 let tempDir = getTempPath();
 
-export const processShell = (cells: Cell[], language: string): ChildProcessWithoutNullStreams => {
+export const processShell = (cell: Cell, language: string): ChildProcessWithoutNullStreams => {
     let fileName = vscode.window.activeTextEditor?.document.fileName as string;
     // Get directory by slicing off last slash
     let dir = fileName.substring(0, fileName.lastIndexOf("/"));
@@ -15,17 +15,13 @@ export const processShell = (cells: Cell[], language: string): ChildProcessWitho
         dir = fileName.substring(0, fileName.lastIndexOf("\\"));
     }
     let main = "";
-    for (const cell of cells) {
-        // Ignore all the clutter from the generated files when running tree
-        let contents = cell.contents.trim();
-        if (contents.endsWith("tree")) {
-            contents = "tree -I '__pycache__|main.sh|main.fish|main.nu|target'"
-        }
-        main += `#!/bin/${language}\necho '!!output-start-cell'\n`;
-        main += contents;
+    // Ignore all the clutter from the generated files when running tree
+    let contents = cell.contents.trim();
+    if (contents.endsWith("tree")) {
+        contents = "tree -I '__pycache__|main.sh|main.fish|main.nu|target'"
     }
-
-    vscode.window.showErrorMessage(main.trim())
+    main += `#!/bin/${language}\necho '!!output-start-cell'\n`;
+    main += contents;
 
     let extension = "";
     let runner = "";

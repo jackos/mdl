@@ -178,7 +178,9 @@ export class Kernel {
             exec.end(true, (new Date).getTime());
         } else {
             let output: ChildProcessWithoutNullStreams;
+
             const mimeType = `text/plain`;
+            let currentCell = cellsStripped[cellsStripped.length - 1] as Cell;
             switch (lang) {
                 case "mojo":
                     if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
@@ -234,19 +236,19 @@ export class Kernel {
                     break;
                 case "bash":
                     lastRunLanguage = "bash";
-                    output = processShell(cellsStripped, lastRunLanguage);
+                    output = processShell(currentCell, lastRunLanguage);
                     break;
                 case "fish":
                     lastRunLanguage = "fish";
-                    output = processShell(cellsStripped, lastRunLanguage);
+                    output = processShell(currentCell, lastRunLanguage);
                     break;
                 case "nushell":
                     lastRunLanguage = "nushell";
-                    output = processShell(cellsStripped, lastRunLanguage);
+                    output = processShell(currentCell, lastRunLanguage);
                     break;
                 case "shellscript":
                     lastRunLanguage = "bash";
-                    output = processShell(cellsStripped, lastRunLanguage);
+                    output = processShell(currentCell, lastRunLanguage);
                     break;
                 default:
                     let response = encoder.encode("Language hasn't been implemented yet");
@@ -263,14 +265,9 @@ export class Kernel {
             });
 
             let fixingImports = false;
-            let currentCell = cellsStripped.pop() as Cell;
             let errorText = "";
 
             output.stderr.on("data", async (data: Uint8Array) => {
-                if (data.toString().match(/no required module provides/) || data.toString().match(/go: updates to go.mod needed/)) {
-                    fixingImports = true;
-                    await fixImportsGo(exec, currentCell.cell);
-                }
                 errorText = data.toString();
                 exec.appendOutput([new NotebookCellOutput([NotebookCellOutputItem.text(errorText, mimeType)])]);
             });

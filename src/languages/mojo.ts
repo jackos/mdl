@@ -10,7 +10,6 @@ let tempDir = getTempPath();
 export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams => {
     let innerScope = "";
     let cellCount = 0;
-    let writeAdditionalFile = ""
 
     for (const cell of cells) {
         cell.contents = cell.contents.trim();
@@ -22,7 +21,21 @@ export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams =>
         for (let line of lines) {
             i++
             if (i==1 && line.replace(/\s/g, "").substring(0, 6) == "#file:") {
-                writeAdditionalFile = line.split(":")[1].trim()
+                let file = line.split(":")[1].trim()
+                if (file != "main.mojo"){
+                    let cleaned = ""
+                    for(let line2 of lines){
+                        if(line2.trim() != 'print("!!output-start-cell")'){
+                            cleaned += line2 + "\n"
+                        }
+                    }
+                    if (path.isAbsolute(file)) {
+                        writeFileSync(file, cleaned);
+                    } else {
+                        writeFileSync(path.join(tempDir, file), cleaned);
+                    }
+                }
+                continue
             }
             if (line.trim() == "from python import Python") {
                 continue
@@ -31,10 +44,10 @@ export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams =>
                 continue;
             }
 
-            if (line.length > 0 && line[0] !== " " && line[line.length - 1] != ")" && i == len && !line.includes("#")) {
+            if (line[0] !== " " && i == len && !line.includes("#") && line.trim().split(" ").length == 1 && !line.endsWith(")")) {
                 // if first char is `!` pretty print
                 if (line[0] === "!") {
-                    innerScope += `let pprint = Python.import_module("pprint")\n`;
+                    innerScope += `    let pprint = Python.import_module("pprint")\n`;
                     line = "pprint(" + line.substring(1) + ")";
                 } else {
                     line = "print(" + line + ")";
@@ -48,11 +61,9 @@ export let processCellsMojo = (cells: Cell[]): ChildProcessWithoutNullStreams =>
     let mainFile = path.join(tempDir, "main.mojo");
     const activeFilePath = path.dirname(window.activeTextEditor?.document.uri.fsPath as string);
     let header = `def main():\n    from python import Python\n    let sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n`
+
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
-    if(writeAdditionalFile) {
-        writeFileSync(path.join(tempDir, writeAdditionalFile), header + innerScope);
-    }
 
     return spawn('mojo', [mainFile]);
 };

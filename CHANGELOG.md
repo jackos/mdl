@@ -1,4 +1,3 @@
-
 # Changelog
 
 ## v0.6.1
@@ -8,6 +7,12 @@
 - Make tree ignore `__pycache__` and other generated files
 - Ignore whitespace when checking for first comment with `# file:` in python files 
 - Add the `# file:` to generate file feature to Mojo
+- For shell scripts, just run a single cell not every previous cell as well
+
+### Bug Fixes
+
+- Writing files was causing mulitple prints when importing another module
+- Fix up both parsing from and too markdown, trim cells and get whitepace right
 
 ## v0.6.0
 
@@ -136,5 +141,3 @@
 ### Features
 
 Working notebook with Rust, Go, Javascript and Typescript
-
-

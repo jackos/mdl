@@ -1,5 +1,5 @@
 import { TextDecoder, TextEncoder } from 'util';
-import { NotebookCellKind, NotebookCellData } from 'vscode';
+import { NotebookCellKind, NotebookCellData, window } from 'vscode';
 
 export interface RawNotebookCell {
     indentation?: string;
@@ -130,14 +130,13 @@ export function parseMarkdown(content: string): RawNotebookCell[] {
             i++;
         }
 
-        const content = lines.slice(startSourceIdx, i).join('\n');
-        const trailingWhitespace = parseWhitespaceLines(false);
+        let content = lines.slice(startSourceIdx, i).join('\n').trim();
         cells.push({
             language: 'markdown',
             content,
             kind: NotebookCellKind.Markup,
             leadingWhitespace: leadingWhitespace,
-            trailingWhitespace: trailingWhitespace
+            trailingWhitespace: ""
         });
     }
 
@@ -146,9 +145,9 @@ export function parseMarkdown(content: string): RawNotebookCell[] {
 
 const stringDecoder = new TextDecoder();
 export function writeCellsToMarkdown(cells: ReadonlyArray<NotebookCellData>): string {
-    // Always start markdown block with a newline
     let result = '';
     for (let i = 0; i < cells.length; i++) {
+        result += "\n\n"
         const cell = cells[i];
         if (cell.kind === NotebookCellKind.Code) {
             let outputParsed = "";
@@ -163,21 +162,19 @@ export function writeCellsToMarkdown(cells: ReadonlyArray<NotebookCellData>): st
             const codePrefix = '```' + languageAbbrev + '\n';
             const contents = cell.value.split(/\r?\n/g)
                 .join('\n');
-            const codeSuffix = '\n' + '```';
+            const codeSuffix = '\n```';
             result += codePrefix + contents + codeSuffix;
             if (outputParsed !== '' && outputParsed !== '\n' && outputParsed.length > 0) {
-                result += '\n```output\n' + outputParsed;
+                result += '\n\n```output\n' + outputParsed;
                 if (outputParsed.slice(-1) !== '\n') {
                     result += '\n';
                 }
                 result += '```';
             }
         } else {
-            // Puts in a full \n\n above every markdown cell in source code, which is
-            // interpreted in markdown as a single \n 
-            result += '\n' + cell.value;
+            result += cell.value.trim();
         }
-        result += '\n';
     }
-    return result;
+    // Each cell adds a newline at the start to keep spacing between code blocks correct
+    return result.substring(2);
 }

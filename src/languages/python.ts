@@ -10,7 +10,6 @@ let tempDir = getTempPath();
 export let processCellsPython = (cells: Cell[]): ChildProcessWithoutNullStreams => {
     let innerScope = "";
     let cellCount = 0;
-    let writeAdditionalFile = ""
     const activeFilePath = path.dirname(window.activeTextEditor?.document.uri.fsPath as string);
     for (const cell of cells) {
         innerScope += `\nprint("!!output-start-cell")\n`;
@@ -22,9 +21,23 @@ export let processCellsPython = (cells: Cell[]): ChildProcessWithoutNullStreams 
         for (let line of lines) {
             i++
             if (i==1 && line.replace(/\s/g, "").substring(0, 6) == "#file:") {
-                writeAdditionalFile = line.split(":")[1].trim()
+                let file = line.split(":")[1].trim()
+                if (file != "main.py"){
+                    let cleaned = ""
+                    for(let line2 of lines){
+                        if(line2.trim() != 'print("!!output-start-cell")'){
+                            cleaned += line2 + "\n"
+                        }
+                    }
+                    if (path.isAbsolute(file)) {
+                        writeFileSync(file, cleaned);
+                    } else {
+                        writeFileSync(path.join(tempDir, file), cleaned);
+                    }
+                }
+                continue
             }
-            if (line.length > 0 && line[0] !== " " && line[line.length - 1] != ")" && i == len && !line.includes("#")) {
+            if (line[0] !== " " && i == len && !line.includes("#") && line.trim().split(" ").length == 1 && !line.endsWith(")")) {
                 // if first char is `!` pretty print
                 if (line[0] === "!") {
                     innerScope += "from pprint import pprint\n";
@@ -43,9 +56,5 @@ export let processCellsPython = (cells: Cell[]): ChildProcessWithoutNullStreams 
 
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
-    if(writeAdditionalFile) {
-        writeFileSync(path.join(tempDir, writeAdditionalFile), header + innerScope);
-    }
-
     return spawn('python', [mainFile]);
 };
