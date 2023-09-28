@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell } from "../kernel";
+import { Cell, CommentDecorator } from "../types";
 import path from "path";
 import {window} from "vscode";
 
@@ -38,10 +38,8 @@ export let processCellsMojo = (cells: Cell[]): {stream: ChildProcessWithoutNullS
                 }
                 continue
             }
-            if(i == 1) {
-                if (line.startsWith("# clear-output")) {
-                    clearOutput = true
-                }
+            if (i == 1 && cellCount == cells.length && line.startsWith('# ' + CommentDecorator.clear)) {
+                clearOutput = true
             }
             if (
                 line.startsWith("fn main():") ||

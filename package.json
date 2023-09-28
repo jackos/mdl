@@ -2,7 +2,7 @@
   "name": "md-notebook",
   "displayName": "md-notebook",
   "publisher": "jackos",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Execute code with any language in a notebook, source code is saved as markdown, and generate code blocks with AI models",
   "main": "./dist/extension.js",
   "icon": "md-notebook.png",

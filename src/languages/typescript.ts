@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell } from "../kernel";
+import { Cell } from "../types";
 import path from "path";
 
 let tempDir = getTempPath();

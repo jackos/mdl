@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell } from "../kernel";
+import { Cell } from "../types";
 import { prelude as macros } from "./rust_macros";
 import * as vscode from "vscode";
 import { dirname } from "path";

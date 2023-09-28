@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import * as path from "path";
 import { NotebookCell, NotebookCellExecution, NotebookCellOutput, NotebookCellOutputItem } from "vscode";
 import { getTempPath } from "../config";
-import { Cell } from "../kernel";
+import { Cell } from "../types";
 let lastImportNumber = 0;
 
 export let processCellsGo = (cells: Cell[]): ChildProcessWithoutNullStreams => {

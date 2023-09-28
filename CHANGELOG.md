@@ -1,19 +1,27 @@
 # Changelog
 
+## v0.6.2
+
+### Bug Fixes
+
+- Add `# md-notebook:clear` to not print or save output in Mojo and Python
+- Add `python3` check if `python` not on path
+- Shellscript cells now save environment changes
+
 ## v0.6.1
 
 ### Features
 
 - Add ability to clear output in Mojo and Python
-- Add the `# file:` to generate file feature to Mojo
+- Add `# file:` to generate files with Mojo
 - In shells `tree` ignore `__pycache__` and other generated files
 
 ### Bug Fixes
 
 - For shell scripts, just run a single cell not every previous cell as well
 - Ignore whitespace when checking for first comment with `# file:` in python files 
-- Writing files was causing mulitple prints when importing another module
-- Fix parsing to and from markdown, trim cells and get whitepace right
+- Writing files was causing multiple prints when importing another module
+- Fix parsing to and from markdown, trim cells and get whitespace right
 - Make cancellation of running cell always work
 - Fix `Run all cells`
 

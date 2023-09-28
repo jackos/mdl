@@ -1,17 +1,19 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell } from "../kernel";
-import { window } from  "vscode"
+import { Cell, CommentDecorator } from "../types";
+import vscode from  "vscode"
 import path from "path"
 
 let tempDir = getTempPath();
 
-export let processCellsPython = (cells: Cell[]): {stream: ChildProcessWithoutNullStreams, clearOutput: boolean }=> {
+export let processCellsPython = (cells: Cell[], command: string): {stream: ChildProcessWithoutNullStreams, clearOutput: boolean }=> {
+
+    vscode.window.showInformationMessage(`Inside python running: ${command}`)
     let innerScope = "";
     let cellCount = 0;
     let clearOutput = false;
-    const activeFilePath = path.dirname(window.activeTextEditor?.document.uri.fsPath as string);
+    const activeFilePath = path.dirname(vscode.window.activeTextEditor?.document.uri.fsPath as string);
     for (const cell of cells) {
         innerScope += `\nprint("!!output-start-cell")\n`;
         cell.contents = cell.contents.trim();
@@ -39,10 +41,8 @@ export let processCellsPython = (cells: Cell[]): {stream: ChildProcessWithoutNul
                 continue
             }
 
-            if (i == 1) {
-                if (line.startsWith("# clear-output")) {
-                    clearOutput = true
-                }
+            if (i == 1 && cellCount == cells.length && line.startsWith("# " + CommentDecorator.clear)) {
+                clearOutput = true
             }
             if (line[0] !== " " && i == len && !line.includes("#") && line.trim().split(" ").length == 1 && !line.endsWith(")")) {
                 // if first char is `!` pretty print
@@ -64,5 +64,6 @@ export let processCellsPython = (cells: Cell[]): {stream: ChildProcessWithoutNul
 
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
-    return {stream: spawn('python', [mainFile]), clearOutput};
+    
+    return {stream: spawn(command, [mainFile]), clearOutput};
 };
