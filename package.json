@@ -2,7 +2,7 @@
   "name": "md-notebook",
   "displayName": "md-notebook",
   "publisher": "jackos",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Execute code with any language in a notebook, source code is saved as markdown, and generate code blocks with AI models",
   "main": "./dist/extension.js",
   "icon": "md-notebook.png",
@@ -118,7 +118,10 @@
     "test": "node ./out/test/runTest.js",
     "compile": "node ./build.mjs",
     "watch": "node ./watch.mjs",
-    "vscode:prepublish": "node ./build.mjs"
+    "vscode:prepublish": "node ./build.mjs",
+    "install-extension": "code --install-extension $(ls md-notebook-*)",
+    "package": "vsce package",
+    "i": "npm run compile && npm run package && npm run install-extension"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
