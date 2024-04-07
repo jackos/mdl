@@ -21,7 +21,7 @@ export let lastRunLanguage = '';
 // and running it through different languages, then returning results in the same format.
 export class Kernel {
     async executeCells(doc: NotebookDocument, cells: NotebookCell[], ctrl: NotebookController): Promise<void> {
-        for(const cell of cells) {
+        for (const cell of cells) {
             await this.executeCell(doc, [cell], ctrl)
         }
     }
@@ -41,7 +41,7 @@ export class Kernel {
         // Used for the cell timer counter
         exec.start((new Date).getTime());
         // TODO check lang and change comment symbols
-        if(currentCell.document.getText().trimStart().startsWith("#" + CommentDecorator.skip)){
+        if (currentCell.document.getText().trimStart().startsWith("#" + CommentDecorator.skip)) {
             exec.end(true, (new Date).getTime());
             return
         }
@@ -49,12 +49,13 @@ export class Kernel {
 
         // Get all cells up to this one
         let range = new NotebookRange(0, cells[0].index + 1);
-        let cellsAll = doc.getCells(range);
+        let cellsUpToCurrent = doc.getCells(range);
+        let cellsAll = doc.getCells();
 
         // Build a object containing languages and their cells
         let cellsStripped: Cell[] = [];
         let matchingCells = 0;
-        for (const cell of cellsAll) {
+        for (const cell of cellsUpToCurrent) {
             if (cell.document.languageId === cells[0].document.languageId) {
                 matchingCells++;
                 cellsStripped.push({
@@ -126,7 +127,7 @@ export class Kernel {
             workspace.applyEdit(edit);
             exec.end(true, (new Date).getTime());
 
-        // Normal language related execution
+            // Normal language related execution
         } else {
             let output: ChildProcessWithoutNullStreams;
 
@@ -259,9 +260,10 @@ export class Kernel {
 
             output.stderr.on("data", async (data: Uint8Array) => {
                 errorText = data.toString();
-                if(errorText) {
+                if (errorText) {
                     exec.appendOutput([new NotebookCellOutput([NotebookCellOutputItem.text(errorText, mimeType)])]);
                 }
+                
             });
 
             let buf = Buffer.from([]);
@@ -273,14 +275,15 @@ export class Kernel {
                 buf = Buffer.concat(arr);
                 let outputs = decoder.decode(buf).split("!!output-start-cell\n");
                 let currentCellOutput: string
-                if(lastRunLanguage == "shell"){
+                if (lastRunLanguage == "shell") {
                     currentCellOutput = outputs[1]
                 } else {
                     currentCellOutput = outputs[currentCellLang.index];
                 }
-                if(!clearOutput && currentCellOutput.trim()) {
+                if (!clearOutput && currentCellOutput.trim()) {
                     exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])]);
                 }
+                
             });
 
             output.on('close', (_) => {
@@ -289,6 +292,31 @@ export class Kernel {
                     exec.end(false, (new Date).getTime());
                 } else {
                     exec.end(true, (new Date).getTime());
+                }
+
+                // Loop through all the cells and increment version of image if it exists
+                for (const [i, cell] of cellsAll.entries()) {
+                    let text = cell.document.getText();
+                    text.replace(/<img src="(.*?)(\?version=(\d+))?"(.*)/g, (match, prefix, versionQuery, versionNum, suffix) => {
+                        if(match) {
+                            let replaceText = ""
+                            vscode.window.showInformationMessage(`prefix=${prefix} versionQuery=${versionQuery} version=${versionNum} suffix=${suffix}`)
+                            if (versionQuery) {
+                            //   If ?version= is present, increment the version number
+                                let newVersionNum = parseInt(versionNum, 10) + 1;
+                                replaceText = `<img src="${prefix}?version=${newVersionNum}"${suffix}`;
+                            } else {
+                            //   If ?version= is not present, add ?version=1
+                                replaceText = `<img src="${prefix}?version=1"${suffix}`;
+                            }
+                            let edits: vscode.NotebookCellData[] = [];
+                            edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, replaceText, "markdown"));
+                            const edit = new WorkspaceEdit();
+                            let notebook_edit = NotebookEdit.replaceCells(new NotebookRange(i, i + 1), edits);
+                            edit.set(cellsAll[i].notebook.uri, [notebook_edit]);
+                            workspace.applyEdit(edit);
+                        }
+                    });
                 }
             });
         }

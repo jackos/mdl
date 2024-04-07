@@ -103,7 +103,7 @@ export function parseMarkdown(content: string): RawNotebookCell[] {
         const content = lines.slice(startSourceIdx, i - 1)
             .join('\n');
         const trailingWhitespace = parseWhitespaceLines(false);
-        if (lang === "output") {
+        if (lang === "text") {
             cells[cells.length - 1].outputs = [{ items: [{ data: textEncoder.encode(content), mime: "text/plain" }] }];
         } else {
             cells.push({
@@ -166,7 +166,7 @@ export function writeCellsToMarkdown(cells: ReadonlyArray<NotebookCellData>): st
             const codeSuffix = '\n```';
             result += codePrefix + contents + codeSuffix;
             if (outputParsed !== '' && outputParsed !== '\n' && outputParsed.length > 0) {
-                result += '\n\n```output\n' + outputParsed;
+                result += '\n\n```text\n' + outputParsed;
                 if (outputParsed.slice(-1) !== '\n') {
                     result += '\n';
                 }

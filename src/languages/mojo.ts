@@ -1,5 +1,5 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync, existsSync } from "fs";
 import { getTempPath } from "../config";
 import { Cell, CommentDecorator } from "../types";
 import path from "path";
@@ -64,11 +64,15 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
     };
 
     let mainFile = path.join(tempDir, "main.mojo");
+    let pythonFile = path.join(tempDir, "md_notebook.py");
+    if (existsSync(pythonFile)) {
+        window.showInformationMessage("This exists: " + pythonFile)
+    }
     const activeFilePath = path.dirname(window.activeTextEditor?.document.uri.fsPath as string);
+
     let header = `def main():\n    from python import Python\n    sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n`
 
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
-
-    return { stream: spawn('mojo', [mainFile], { env: process.env }), clearOutput };
+    return { stream: spawn('mojo', [mainFile], {cwd: activeFilePath }), clearOutput };
 };

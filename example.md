@@ -14,7 +14,7 @@ fn main() {
 }
 ```
 
-```output
+```text
 The sum is 12
 ```
 
@@ -24,7 +24,7 @@ The sum is 12
 print("wow sweet one")
 ```
 
-```output
+```text
 wow sweet one
 ```
 

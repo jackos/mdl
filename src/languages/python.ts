@@ -59,11 +59,11 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
         }
     };
 
-    let mainFile = path.join(tempDir, "main.py");
+    let mainFile = path.join(tempDir, "md_notebook.py");
     let header = `import sys\nsys.path.append("${activeFilePath}")\nsys.path.append("${tempDir}")`
 
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
     
-    return {stream: spawn(command, [mainFile]), clearOutput};
+    return {stream: spawn(command, [mainFile], {cwd: activeFilePath}), clearOutput};
 };
