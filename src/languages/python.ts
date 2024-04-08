@@ -15,9 +15,29 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
     let clearOutput = false;
     const activeFilePath = path.dirname(vscode.window.activeTextEditor?.document.uri.fsPath as string);
     for (const cell of cells) {
-        innerScope += `\nprint("!!output-start-cell")\n`;
+        innerScope += `\nprint("!!output-start-cell", flush=True)\n`;
         cell.contents = cell.contents.trim();
+
+        const regex = /(\s*print\s*\()(.*?)(\)\s*$)/gm;
+
+        cell.contents = cell.contents.replace(regex, (_, before, content, after) => {
+            // Check if 'flush=True' is already present
+            if (!content.includes('flush=True')) {
+                if (content.trim()) { // If there's content inside the print statement, add ', flush=True'
+                    content += ", flush=True";
+                } else { // If the print statement is empty, just add 'flush=True'
+                    content = "flush=True";
+                }
+            }
+            return `${before}${content}${after}`;
+        });
         cellCount++;
+        if(cell.contents.startsWith("#md-notebook:skip") || cell.contents.startsWith("# md-notebook:skip")) {
+            continue;
+        } 
+        if(cell.contents.startsWith("#md-notebook:skip")) {
+            continue
+        } 
         let lines = cell.contents.split("\n");
         const len = lines.length;
         let i = 0
@@ -28,7 +48,7 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
                 if (file != "main.py"){
                     let cleaned = ""
                     for(let line2 of lines){
-                        if(line2.trim() != 'print("!!output-start-cell")'){
+                        if(line2.trim() != 'print("!!output-start-cell", flush=True)'){
                             cleaned += line2 + "\n"
                         }
                     }
@@ -48,9 +68,9 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
                 // if first char is `!` pretty print
                 if (line[0] === "!") {
                     innerScope += "from pprint import pprint\n";
-                    line = "pprint(" + line.substring(1) + ")";
+                    line = "pprint(" + line.substring(1) + ", flush=True)";
                 } else {
-                    line = "print(" + line + ")";
+                    line = "print(" + line + ", flush=True)";
                 }
 
 
@@ -60,7 +80,7 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
     };
 
     let mainFile = path.join(tempDir, "md_notebook.py");
-    let header = `import sys\nsys.path.append("${activeFilePath}")\nsys.path.append("${tempDir}")`
+    let header = `import sys\nsys.path.append("${activeFilePath}")\nsys.path.append("${tempDir}")\nfrom builtins import *\n`
 
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.3
+
+- Add Mojo calling Python support via `py` module.
+
 ## v0.6.2
 
 ### Bug Fixes

@@ -50,11 +50,11 @@ export class Kernel {
         // Get all cells up to this one
         let range = new NotebookRange(0, cells[0].index + 1);
         let cellsUpToCurrent = doc.getCells(range);
-        let cellsAll = doc.getCells();
 
         // Build a object containing languages and their cells
         let cellsStripped: Cell[] = [];
         let matchingCells = 0;
+        let pythonCells = 0;
         for (const cell of cellsUpToCurrent) {
             if (cell.document.languageId === cells[0].document.languageId) {
                 matchingCells++;
@@ -63,6 +63,11 @@ export class Kernel {
                     contents: cell.document.getText(),
                     cell: cell,
                 });
+            }
+            if (cells[0].document.languageId === "mojo") {
+                if(cell.document.languageId === "python") {
+                    pythonCells += 1;
+                }
             }
         }
 
@@ -263,7 +268,7 @@ export class Kernel {
                 if (errorText) {
                     exec.appendOutput([new NotebookCellOutput([NotebookCellOutputItem.text(errorText, mimeType)])]);
                 }
-                
+
             });
 
             let buf = Buffer.from([]);
@@ -273,17 +278,17 @@ export class Kernel {
             output.stdout.on('data', (data: Uint8Array) => {
                 let arr = [buf, data];
                 buf = Buffer.concat(arr);
-                let outputs = decoder.decode(buf).split("!!output-start-cell\n");
+                let outputs = decoder.decode(buf).split(/!!output-start-cell[\n,""," "]/g);
                 let currentCellOutput: string
                 if (lastRunLanguage == "shell") {
                     currentCellOutput = outputs[1]
                 } else {
-                    currentCellOutput = outputs[currentCellLang.index];
+                    currentCellOutput = outputs[currentCellLang.index + pythonCells];
                 }
                 if (!clearOutput && currentCellOutput.trim()) {
                     exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])]);
                 }
-                
+
             });
 
             output.on('close', (_) => {
@@ -295,28 +300,64 @@ export class Kernel {
                 }
 
                 // Loop through all the cells and increment version of image if it exists
-                for (const [i, cell] of cellsAll.entries()) {
-                    let text = cell.document.getText();
-                    text.replace(/<img src="(.*?)(\?version=(\d+))?"(.*)/g, (match, prefix, versionQuery, versionNum, suffix) => {
-                        if(match) {
-                            let replaceText = ""
-                            vscode.window.showInformationMessage(`prefix=${prefix} versionQuery=${versionQuery} version=${versionNum} suffix=${suffix}`)
-                            if (versionQuery) {
-                            //   If ?version= is present, increment the version number
-                                let newVersionNum = parseInt(versionNum, 10) + 1;
-                                replaceText = `<img src="${prefix}?version=${newVersionNum}"${suffix}`;
-                            } else {
-                            //   If ?version= is not present, add ?version=1
-                                replaceText = `<img src="${prefix}?version=1"${suffix}`;
+
+                if (doc.getCells().length >= (cells[0].index + 1)) {
+                    let cell = doc.getCells(new NotebookRange(cells[0].index + 1, cells[0].index + 2))[0]
+                    if (cell.kind === vscode.NotebookCellKind.Markup) {
+                        let text = cell.document.getText();
+                        text.replace(/(.*[^`]*<img\s*src\s*=\s*".*?)(\?version=(\d+))?"(.*)/g, (match, prefix, versionQuery, versionNum, suffix) => {
+                            if (match) {
+                                let replaceText = ""
+                                if (versionQuery) {
+                                    //   If ?version= is present, increment the version number
+                                    let newVersionNum = parseInt(versionNum, 10) + 1;
+                                    replaceText = `${prefix}?version=${newVersionNum}"${suffix}`;
+                                } else {
+                                    //   If ?version= is not present, add ?version=1
+                                    replaceText = `${prefix}?version=1"${suffix}`;
+                                }
+                                let workspaceEdit = new vscode.WorkspaceEdit();
+                                let fullRange = new vscode.Range(
+                                    0,
+                                    0,
+                                    cell.document.lineCount - 1,
+                                    cell.document.lineAt(cell.document.lineCount - 1).text.length
+                                );
+                                workspaceEdit.replace(cell.document.uri, fullRange, replaceText);
+                                vscode.workspace.applyEdit(workspaceEdit);
+                                vscode.window.showNotebookDocument(vscode.window.activeNotebookEditor?.notebook as NotebookDocument, {
+                                    viewColumn: vscode.window.activeNotebookEditor?.viewColumn,
+                                    selections: [new NotebookRange(cell.index, cell.index + 1)],
+                                    preserveFocus: true,
+                                }).then(() => {
+                                    // Execute commands to toggle cell edit mode and then toggle it back to preview.
+                                    vscode.commands.executeCommand('notebook.cell.edit').then(() => {
+                                    vscode.commands.executeCommand('notebook.cell.quitEdit').then(() => {
+                                        // Optionally, add any additional logic that needs to run after the refresh.
+                                        });
+                                    });
+                                });
+                                vscode.window.showNotebookDocument(vscode.window.activeNotebookEditor?.notebook as NotebookDocument, {
+                                    viewColumn: vscode.window.activeNotebookEditor?.viewColumn,
+                                    selections: [new NotebookRange(cell.index - 1, cell.index)],
+                                    preserveFocus: false,
+                                })
+
+                                // let edits: vscode.NotebookCellData[] = [];
+                                // edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, replaceText, "markdown"));
+                                // const edit = new WorkspaceEdit();
+                                // const currentRange =new NotebookRange(i, i + 1)
+                                // let notebook_edit = NotebookEdit.replaceCells(currentRange, edits);
+                                // edit.set(cellsAll[i].notebook.uri, [notebook_edit]);
+                                // workspace.applyEdit(edit);
+                                // vscode.window.showNotebookDocument(vscode.window.activeNotebookEditor?.notebook as NotebookDocument, {
+                                //     viewColumn: vscode.window.activeNotebookEditor?.viewColumn,
+                                //     selections: [currentRange],
+                                //     preserveFocus: false
+                                // });
                             }
-                            let edits: vscode.NotebookCellData[] = [];
-                            edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, replaceText, "markdown"));
-                            const edit = new WorkspaceEdit();
-                            let notebook_edit = NotebookEdit.replaceCells(new NotebookRange(i, i + 1), edits);
-                            edit.set(cellsAll[i].notebook.uri, [notebook_edit]);
-                            workspace.applyEdit(edit);
-                        }
-                    });
+                        });
+                    }
                 }
             });
         }
