@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.5
+
+- Add github actions CI
+
 ## v0.6.4
 
 - Fix outputs from ML models having empty cells

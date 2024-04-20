@@ -78,10 +78,7 @@ export class Kernel {
         let clearOutput = false;
 
         // AI Model related, generates new code blocks, may expand this later
-        vscode.window.showInformationMessage(lang) 
-        vscode.window.showInformationMessage(`Is llama3-8b: ${lang === "llama3-8b"}`) 
         if (lang === "llama3-8b") {
-            vscode.window.showInformationMessage("inside llama3 8b!") 
             lastRunLanguage = "llama3-8b";
             const url = 'https://api.groq.com/openai/v1/chat/completions';
             const headers = {

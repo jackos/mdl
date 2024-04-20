@@ -2,7 +2,7 @@
   "name": "mdl-ai",
   "displayName": "MDL.AI",
   "publisher": "jackos",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.",
   "main": "./dist/extension.js",
   "icon": "mdl.png",
