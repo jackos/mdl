@@ -1,11 +1,11 @@
 {
-  "name": "md-notebook",
-  "displayName": "md-notebook",
+  "name": "mdl-ai",
+  "displayName": "MDL.AI",
   "publisher": "jackos",
-  "version": "0.6.3",
-  "description": "Execute code with any language in a notebook, source code is saved as markdown, and generate code blocks with AI models",
+  "version": "0.6.4",
+  "description": "Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.",
   "main": "./dist/extension.js",
-  "icon": "md-notebook.png",
+  "icon": "mdl.png",
   "keywords": [
     "md",
     "markdown",
@@ -14,14 +14,26 @@
     "jupyter"
   ],
   "activationEvents": [
-    "onNotebook:md-notebook",
-    "onCommand:md-notebook.preview"
+    "onNotebook:mdl",
+    "onCommand:mdl.preview"
+  ],
+  "customEditors": [
+    {
+      "viewType": "catEdit.catScratch",
+      "displayName": "Cat Scratch",
+      "selector": [
+        {
+          "filenamePattern": "*.cscratch"
+        }
+      ],
+      "priority": "default"
+    }
   ],
   "engines": {
-    "vscode": "^1.88.0"
+    "vscode": "^1.86.0"
   },
   "repository": {
-    "url": "https://github.com/jackos/md-notebook"
+    "url": "https://github.com/jackos/mdl"
   },
   "author": "Jack Clayton",
   "license": "ISC",
@@ -34,26 +46,31 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "md-notebook configuration",
+      "title": "mdl configuration",
       "properties": {
-        "md-notebook.basePath": {
+        "mdl.basePath": {
           "description": "Path where searchable notes will be stored",
           "type": "string",
           "scope": "window"
         },
-        "md-notebook.openaiOrgID": {
+        "mdl.openaiOrgID": {
           "type": "string",
           "default": "",
           "description": "Leave blank if not part of an org, get your org id at https://platform.openai.com/account/org-settings"
         },
-        "md-notebook.openaiKey": {
+        "mdl.openaiKey": {
           "type": "string",
           "default": "",
           "description": "Set up an API key at: https://platform.openai.com/account/api-keys"
         },
-        "md-notebook.openaiModel": {
+        "mdl.groqKey": {
           "type": "string",
-          "default": "gpt-3.5-turbo",
+          "default": "",
+          "description": "Set up an API key at: https://console.groq.com/keys"
+        },
+        "mdl.openaiModel": {
+          "type": "string",
+          "default": "gpt-4-turbo",
           "description": "Check out available models here: https://platform.openai.com/docs/models/overview"
         }
 
@@ -61,29 +78,29 @@
     },
     "commands": [
       {
-        "command": "md-notebook.search",
-        "title": "md-notebook: Search notes",
+        "command": "mdl.search",
+        "title": "mdl: Search notes",
         "description": "Adds notes base path to workspace and opens `find in files`"
       },
       {
-        "command": "md-notebook.openMain",
-        "title": "md-notebook: Open generated code",
+        "command": "mdl.openMain",
+        "title": "mdl: Open generated code",
         "description": "Opens the code being generated, by adding the folder to the workspace"
       },
       {
-        "command": "md-notebook.deleteTemp",
-        "title": "md-notebook: Delete Tempory Folder",
+        "command": "mdl.deleteTemp",
+        "title": "mdl: Delete Tempory Folder",
         "description": "Delete the temporary folder with all the generated code files"
       }
     ],
     "keybindings": [
       {
         "key": "alt+f",
-        "command": "md-notebook.search"
+        "command": "mdl.search"
       },
       {
         "key": "alt+o",
-        "command": "md-notebook.openMain"
+        "command": "mdl.openMain"
       }
     ],
     "languages": [
@@ -95,12 +112,17 @@
         ],
         "extensions": [ ],
         "firstLine": "^#!.*\\b(openai)\\b"
+      },
+      {
+        "id": "llama3-8b",
+        "extensions": [ ],
+        "firstLine": "^#!.*\\b(llama3-8b)\\b"
       }
     ],
     "notebooks": [
       {
-        "type": "md-notebook",
-        "displayName": "md-notebook",
+        "type": "mdl",
+        "displayName": "mdl",
         "priority": "default",
         "selector": [
           {
@@ -119,23 +141,15 @@
     "compile": "node ./build.mjs",
     "watch": "node ./watch.mjs",
     "vscode:prepublish": "node ./build.mjs",
-    "install-extension": "code --install-extension $(ls md-notebook-*)",
+    "install-extension": "code --install-extension $(ls mdl-*)",
     "package": "vsce package",
     "i": "npm run compile && npm run package && npm run install-extension"
   },
   "devDependencies": {
-    "@types/glob": "^8.1.0",
-    "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
-    "@types/vscode": "^1.88.0",
-    "@types/vscode-notebook-renderer": "^1.72.3",
-    "@typescript-eslint/eslint-plugin": "^7.5.0",
-    "@typescript-eslint/parser": "^7.5.0",
-    "@vscode/test-electron": "^2.3.9",
+    "@types/vscode": "^1.86.0",
     "esbuild": "^0.20.2",
-    "eslint": "^9.0.0",
-    "glob": "^10.3.12",
-    "mocha": "^10.4.0",
-    "typescript": "^5.4.4"
+    "eslint": "^9.1.0",
+    "typescript": "^5.4.5"
   }
 }

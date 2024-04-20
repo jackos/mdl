@@ -82,7 +82,7 @@ export let processCellsGo = (cells: Cell[]): ChildProcessWithoutNullStreams => {
         }
     };
     let main = "package main\n" + imports + outerScope + "func main() {\nlog.SetOutput(os.Stdout)\n" + innerScope + "}";
-    // let dir = path.join(spawnSync('go', ['env', 'GOPATH']).stdout.toString().trim(), "src", "github.com", "md-notebook", "temp");
+    // let dir = path.join(spawnSync('go', ['env', 'GOPATH']).stdout.toString().trim(), "src", "github.com", "mdl", "temp");
     let dir = getTempPath();
     let mainFile = path.join(dir, 'main.go');
     mkdirSync(dir, { recursive: true });
@@ -96,7 +96,7 @@ export let fixImportsGo = (exec: NotebookCellExecution, cell: NotebookCell): Pro
         let encoder = new TextEncoder();
         console.log("tidying");
         let tempDir = getTempPath();
-        let goMod = "module github.com/md-notebook/temp\ngo 1.21\n";
+        let goMod = "module github.com/mdl/temp\ngo 1.21\n";
         let goModFile = path.join(tempDir, 'go.mod');
         writeFileSync(goModFile, goMod);
         let tidy = spawn('go', ['mod', 'tidy'], { cwd: tempDir });

@@ -25,6 +25,7 @@ const LANG_IDS = new Map([
     ['fish', 'fish'],
     ['zsh', 'zsh'],
     ['openai', 'openai'],
+    ['llama3-8b', 'llama3-8b'],
 ]);
 
 const LANG_ABBREVS = new Map(

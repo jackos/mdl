@@ -9,7 +9,7 @@ import { processShell as processShell } from './languages/shell';
 import { processCellsPython } from './languages/python';
 import * as vscode from 'vscode';
 import { processCellsMojo } from './languages/mojo';
-import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID } from "./config"
+import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID, getGroqAIKey } from "./config"
 
 import { Cell, ChatMessage, ChatRequest, CommentDecorator } from "./types"
 import { commandNotOnPath, post } from './utils';
@@ -78,7 +78,67 @@ export class Kernel {
         let clearOutput = false;
 
         // AI Model related, generates new code blocks, may expand this later
-        if (lang === "openai") {
+        vscode.window.showInformationMessage(lang) 
+        vscode.window.showInformationMessage(`Is llama3-8b: ${lang === "llama3-8b"}`) 
+        if (lang === "llama3-8b") {
+            vscode.window.showInformationMessage("inside llama3 8b!") 
+            lastRunLanguage = "llama3-8b";
+            const url = 'https://api.groq.com/openai/v1/chat/completions';
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getGroqAIKey()}`,
+            }
+
+            const messages: ChatMessage[] = [{"role": "user", "content": "You're generating codeblocks to help users solve programming problems, make sure that you put the name of the language in the markdown blocks like ```python"}]
+            for (const message of cellsStripped) {
+                messages.push({ role: "user", content: message.contents });
+            }
+            const data: ChatRequest = {
+                "model": "llama3-8b-8192",
+                messages
+            };
+
+            let body = JSON.stringify(data);
+
+
+            let result = await post(url, headers, body)
+            if (!result) {
+                exec.end(false, (new Date).getTime());
+                return
+            }
+
+            vscode.window.showInformationMessage(body)
+
+
+            let text = result.choices[0].message.content;
+            let code_blocks = text.split("```");
+
+            let edits: vscode.NotebookCellData[] = [];
+            for (let [i, block] of code_blocks.entries()) {
+                // If there was any text after split, get the type of language
+                if (block[0] != "\n" && i != 0) {
+                    let language = block.split("\n")[0]
+                    block = block.substring(language.length);
+                    let blockTrimmed = block.trim().replace("\n\n", "\n");
+                    if (blockTrimmed !== "") {
+                        edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Code, blockTrimmed, language));
+                    }
+                }
+                else {
+                    let blockTrimmed = block.trim().replace("\n\n", "");
+                    if (blockTrimmed !== "") {
+                        edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, blockTrimmed, "markdown"));
+                    }
+                }
+
+            }
+            const edit = new WorkspaceEdit();
+            let notebook_edit = NotebookEdit.insertCells(cells[0].index + 1, edits);
+            edit.set(cells[0].notebook.uri, [notebook_edit]);
+            workspace.applyEdit(edit);
+            exec.end(true, (new Date).getTime());
+        }
+        else if (lang === "openai") {
             lastRunLanguage = "openai";
             const url = 'https://api.openai.com/v1/chat/completions';
             const headers = {
@@ -86,11 +146,11 @@ export class Kernel {
                 'Authorization': `Bearer ${getOpenAIKey()}`,
             };
             let orgId = getOpenAIOrgID()
-            let model = getOpenAIModel() || "oh no what wrong"
+            let model = getOpenAIModel() || "couldn't get model"
             if (orgId) {
                 headers['OpenAI-Organization'] = orgId
             }
-            const messages: ChatMessage[] = [{ role: "system", content: "You are a helpful bot named md-notebook, that generates concise code blocks to solve programming problems" }];
+            const messages: ChatMessage[] = [{ role: "system", content: "You are a helpful bot named mdl, that generates concise code blocks to solve programming problems" }];
             for (const message of cellsStripped) {
                 messages.push({ role: "user", content: message.contents });
             }
@@ -117,14 +177,17 @@ export class Kernel {
                 if (block[0] != "\n" && i != 0) {
                     let language = block.split("\n")[0]
                     block = block.substring(language.length);
-                    let blockTrimmed = block.trim().replace("\n\n", "");
-                    edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Code, blockTrimmed, language));
+                    let blockTrimmed = block.trim().replace("\n\n", "\n");
+                    if (blockTrimmed !== "") {
+                        edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Code, blockTrimmed, language));
+                    }
                 }
                 else {
                     let blockTrimmed = block.trim().replace("\n\n", "");
-                    edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, blockTrimmed, "markdown"));
+                    if (blockTrimmed !== "") {
+                        edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, blockTrimmed, "markdown"));
+                    }
                 }
-
             }
             const edit = new WorkspaceEdit();
             let notebook_edit = NotebookEdit.insertCells(cells[0].index + 1, edits);
@@ -342,19 +405,6 @@ export class Kernel {
                                     selections: [new NotebookRange(cell.index - 1, cell.index)],
                                     preserveFocus: false,
                                 })
-
-                                // let edits: vscode.NotebookCellData[] = [];
-                                // edits.push(new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, replaceText, "markdown"));
-                                // const edit = new WorkspaceEdit();
-                                // const currentRange =new NotebookRange(i, i + 1)
-                                // let notebook_edit = NotebookEdit.replaceCells(currentRange, edits);
-                                // edit.set(cellsAll[i].notebook.uri, [notebook_edit]);
-                                // workspace.applyEdit(edit);
-                                // vscode.window.showNotebookDocument(vscode.window.activeNotebookEditor?.notebook as NotebookDocument, {
-                                //     viewColumn: vscode.window.activeNotebookEditor?.viewColumn,
-                                //     selections: [currentRange],
-                                //     preserveFocus: false
-                                // });
                             }
                         });
                     }

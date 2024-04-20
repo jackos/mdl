@@ -1,6 +1,6 @@
-# md-notebook
+# MDL.AI
 
-Generate AI code blocks into a notebook, and execute them locally through many different languages.
+Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.
 
 ## Quick Start
 
@@ -12,11 +12,11 @@ Generate AI code blocks into a notebook, and execute them locally through many d
 - Upload to Github to see outputs rendered as you would expect
 
 __Important Note__
-When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then reopen wth `md-notebook` only when you need it.
+When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then reopen wth `mdl` only when you need it.
 
 ## OpenAI Code Generation
-- [Set up an OpenAI key here](https://platform.openai.com/account/api-keys) and change the setting: `md-notebook: openai key`
-- Default model is `gpt-3.5-turbo`, change the setting with `md-notebook: openai model` e.g. `gpt-4`
+- [Set up an OpenAI key here](https://platform.openai.com/account/api-keys) and change the setting: `mdl: openai key`
+- Default model is `gpt-3.5-turbo`, change the setting with `mdl: openai model` e.g. `gpt-4`
 - Select `openai` as your language in the bottom right
 - Ask it to show you how to do something in one of the supported lanuages
 - Run the code blocks it generates for you

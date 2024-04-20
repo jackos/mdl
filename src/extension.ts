@@ -11,7 +11,7 @@ import { rmSync } from 'fs';
 
 const kernel = new Kernel();
 export async function activate(context: ExtensionContext) {
-    const controller = notebooks.createNotebookController('md-notebook', 'md-notebook', 'md-notebook');
+    const controller = notebooks.createNotebookController('mdl', 'mdl', 'mdl');
     controller.supportedLanguages = [
         'rust', 
         'go', 
@@ -25,6 +25,7 @@ export async function activate(context: ExtensionContext) {
         'json', 
         'plaintext', 
         'openai', 
+        'llama3-8b', 
         'python', 
         'mojo'
     ];
@@ -35,9 +36,9 @@ export async function activate(context: ExtensionContext) {
             kernel.executeCell(doc, cells, ctrl);
         }
     };
-    context.subscriptions.push(commands.registerCommand('md-notebook.search', searchNotes));
-    context.subscriptions.push(commands.registerCommand('md-notebook.openMain', openMain));
-    context.subscriptions.push(commands.registerCommand('md-notebook.deleteTemp', () => rmSync(getTempPath(), { recursive: true, force: true })
+    context.subscriptions.push(commands.registerCommand('mdl.search', searchNotes));
+    context.subscriptions.push(commands.registerCommand('mdl.openMain', openMain));
+    context.subscriptions.push(commands.registerCommand('mdl.deleteTemp', () => rmSync(getTempPath(), { recursive: true, force: true })
 ));
 
     const notebookSettings = {
@@ -48,7 +49,7 @@ export async function activate(context: ExtensionContext) {
         }
     };
 
-    context.subscriptions.push(workspace.registerNotebookSerializer('md-notebook', new MarkdownProvider(), notebookSettings));
+    context.subscriptions.push(workspace.registerNotebookSerializer('mdl', new MarkdownProvider(), notebookSettings));
 }
 
 class MarkdownProvider implements NotebookSerializer {

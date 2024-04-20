@@ -30,12 +30,12 @@ export const searchNotes = async () => {
 
 
 let welcomeMessage = `
-# md-notebook
+# mdl
 ## Introduction
-Welcome to md-notebook, run your Markdown code blocks interactively and save to a standard Markdown format that renders on Github!
+Welcome to mdl, run your Markdown code blocks interactively and save to a standard Markdown format that renders on Github!
 
 ## Searching notes
-Pressing \`alt+f\` will add the default base path \`~/md-notebook\` to your workspace so you can search through your markdown notes, and open this index.md file. Any edits you do this file, or extra \`.md\` files you add to \`~/md-notebook\` will be searchable from any project via \`alt+f\`.
+Pressing \`alt+f\` will add the default base path \`~/mdl\` to your workspace so you can search through your markdown notes, and open this index.md file. Any edits you do this file, or extra \`.md\` files you add to \`~/mdl\` will be searchable from any project via \`alt+f\`.
 
 ## Supported Lanugages
 Try running the below cells, only Typescript and Javascript currently support language servers
@@ -66,7 +66,7 @@ fmt.Println("Using previous cell:", x)
 \`\`\`
 
 ## Generated Code
-This is a simplification of conventional Notebooks that having long running kernels, \`md-notebook\` simply generates code in your \`temp\` directory and runs it using the language's toolchain. Try pressing \`alt+o\` to see what the generated code looks like.
+This is a simplification of conventional Notebooks that having long running kernels, \`mdl\` simply generates code in your \`temp\` directory and runs it using the language's toolchain. Try pressing \`alt+o\` to see what the generated code looks like.
 
 The \`!!output-start-cell\` lines are what's used to split the outputs for each cell, so on every run if a previous cell has changed, it's updated as well.
 
