@@ -2,7 +2,7 @@
   "name": "mdl-ai",
   "displayName": "MDL.AI",
   "publisher": "jackos",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.",
   "main": "./dist/extension.js",
   "icon": "mdl.png",
@@ -16,18 +16,6 @@
   "activationEvents": [
     "onNotebook:mdl",
     "onCommand:mdl.preview"
-  ],
-  "customEditors": [
-    {
-      "viewType": "catEdit.catScratch",
-      "displayName": "Cat Scratch",
-      "selector": [
-        {
-          "filenamePattern": "*.cscratch"
-        }
-      ],
-      "priority": "default"
-    }
   ],
   "engines": {
     "vscode": "^1.86.0"
@@ -119,6 +107,18 @@
         "firstLine": "^#!.*\\b(llama3-8b)\\b"
       }
     ],
+    "customEditors": [
+      {
+        "viewType": "mdl",
+        "displayName": "MDL.AI",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "notebooks": [
       {
         "type": "mdl",
@@ -133,20 +133,15 @@
     ]
   },
   "scripts": {
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js",
     "compile": "node ./build.mjs",
     "watch": "node ./watch.mjs",
-    "vscode:prepublish": "node ./build.mjs",
-    "install-extension": "code --install-extension $(ls mdl-*)",
     "package": "vsce package",
+    "vscode:prepublish": "npm run compile",
+    "install-extension": "code --install-extension $(ls mdl-*)",
     "i": "npm run compile && npm run package && npm run install-extension"
   },
   "devDependencies": {
-    "@types/node": "20.x",
+    "@types/node": "^20.12.7",
     "@types/vscode": "^1.86.0",
     "esbuild": "^0.20.2",
     "eslint": "^9.1.0",

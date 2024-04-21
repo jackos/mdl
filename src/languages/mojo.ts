@@ -40,7 +40,7 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
         });
 
         cellCount++;
-        if(cell.contents.startsWith("#md-notebook:skip") || cell.contents.startsWith("# md-notebook:skip")) {
+        if(cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
             continue;
         } 
         let lines = cell.contents.split("\n");
@@ -109,8 +109,5 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
         env = {"MODULAR_HOME": modularHome, ...env}
     }
     
-    const outputChannel = window.createOutputChannel("md-notebook");
-    outputChannel.appendLine(JSON.stringify(env, null, 2));
-    outputChannel.show()
     return { stream: spawn('mojo', [mainFile], {cwd: activeFilePath, env}), clearOutput };
 };

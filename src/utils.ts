@@ -30,7 +30,7 @@ export const post = async (url, headers, body): Promise<ChatResponse> => {
         }
 
         let json = await response.json()
-        vscode.window.showInformationMessage(`Response from openai: ${JSON.stringify(json, null, 2)}`);
+        vscode.window.showInformationMessage(`Response from LLM: ${JSON.stringify(json, null, 2)}`);
         return json as ChatResponse;
         // Proceed with the `result` if needed
     } catch (error) {

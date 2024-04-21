@@ -9,7 +9,6 @@ let tempDir = getTempPath();
 
 export let processCellsPython = (cells: Cell[], command: string): {stream: ChildProcessWithoutNullStreams, clearOutput: boolean }=> {
 
-    vscode.window.showInformationMessage(`Inside python running: ${command}`)
     let innerScope = "";
     let cellCount = 0;
     let clearOutput = false;
@@ -32,10 +31,10 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
             return `${before}${content}${after}`;
         });
         cellCount++;
-        if(cell.contents.startsWith("#md-notebook:skip") || cell.contents.startsWith("# md-notebook:skip")) {
+        if(cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
             continue;
         } 
-        if(cell.contents.startsWith("#md-notebook:skip")) {
+        if(cell.contents.startsWith("#mdl:skip")) {
             continue
         } 
         let lines = cell.contents.split("\n");

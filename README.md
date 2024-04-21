@@ -2,91 +2,170 @@
 
 Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.
 
+![render-anywhere](https://github.com/jackos/mdl/assets/77730378/e8327299-7d6d-42e8-a0bd-eaf1e93d2645)
+
 ## Quick Start
 
-- Open or create a `.md` document
-- Add a cell
+- Open or create a `.md` document and create a new cell
 - Select a language down the bottom right
-- Run the code and save the document
-- The output is now saved to standard Markdown
-- Upload to Github to see outputs rendered as you would expect
+- Click the run button to generate the output which is saved to markdown
 
 __Important Note__
 When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then reopen wth `mdl` only when you need it.
 
-## OpenAI Code Generation
+## AI Code Generation
+
+![generate-primes](https://github.com/jackos/mdl/assets/77730378/35f34cc1-c7a0-4a5e-9f1e-edec2a593857)
+
+### OpenAI
+
 - [Set up an OpenAI key here](https://platform.openai.com/account/api-keys) and change the setting: `mdl: openai key`
 - Default model is `gpt-3.5-turbo`, change the setting with `mdl: openai model` e.g. `gpt-4`
-- Select `openai` as your language in the bottom right
-- Ask it to show you how to do something in one of the supported lanuages
+- Select `openai` as your language in the bottom right and ask a question
 - Run the code blocks it generates for you
 
-## Description
+### Groq
 
-Straight nodejs stateless implementation for notebooks with no external binaries, kernels or extra npm runtime dependencies, works with compiled languages.
+- [Set up a Groq key here](https://platform.openai.com/account/api-keys) and change the setting: `mdl: Groq key`
+- Select `llama3-8b` as your language and ask it a question
+- Run the code blocks it generates for you
 
-Rather than using complicated kernels, it simply spawns a process that runs your local toolchain for the language you're using, and returns the output. When you save the file it's standard markdown so you can use it for static site generators or upload to github.
+## How it works
+
+Straight nodejs stateless implementation for notebooks with no external binaries or npm runtime dependencies, works with compiled languages. Rather than using complicated kernels, it simply spawns a process that runs your local toolchain for the language you're using, and returns the output.
+
+You don't have to go back and run old cells if you change them, every execution runs the whole program and sends output to the correct cell.
 
 ## Keybindings
 
 You can change keybindings in File > Preferences > Keybindings > search for "mdl". Or you can run them via command palette typing in "mdl"
 
-### Search Notes
+### Search notes
 
 Set up a folder with `.md` documents in `mdl: base path` and press `alt+f` to open a open search. This allows you to quickly search through your notes and execute code blocks. If you've ever used vimwiki this might bring back memories, but it's not reliant on a specific structure so you can set up your files for whatever static site generator you like.
 
-### Open Generated Code
+### Open generated code
 
 Press `alt+o` to open up the source code being used to generate outputs, which will allow you to check your code with a language server if it's not supported in the cells yet.
 
 ## Language Support
 
-It's very simple to add your own language, look inside [src/languages/rust.ts](https://github.com/jackos/mdl/blob/main/src/languages/python.ts) for an example, then add your language to the switch statement in [`src/kernel.ts`](https://github.com/jackos/mdl/blob/main/src/kernel.ts). Please open a pull request if you add a language.
+It's very simple to add your own language, look inside [src/languages/rust.ts](https://github.com/jackos/mdl/blob/main/src/languages/python.ts) for an example, then add your language to the switch statement in [`src/kernel.ts`](https://github.com/jackos/mdl/blob/main/src/kernel.ts). PRs welcomed!
 
-### OpenAI
-
-Generates code blocks which you can then run
-
-### Mojo
-
-- [x] Import External Code
-- [ ] Language Server Support
+This README.md was created with MDL.AI, these are some special features for different languages:
 
 ### Python
 
-- [x] Import External Code
-- [x] Language Server Support
+Python has full LSP support and features you expect from Jupyter like printing out the last expression or variable in a cell:
+
+```python
+x = [5, 6, 7, 8]
+x.reverse()
+x
+```
+
+```text
+[8, 7, 6, 5]
+```
+
+### Mojo
+
+Mojo is a new Systems programming language for AI developers with Python syntax and interop. 
+
+It works with top level code and has some extra features like printing the last line.
+
+Anything you create in an MDL.AI notebook with Python will be available from Mojo via the `py` module:
+
+```mojo
+var res = String("Adding a String from Python to a Mojo variable: ") + py.x
+res
+```
+
+```text
+Adding a String from Python to a Mojo variable: [8, 7, 6, 5]
+```
+
+LSP features don't work yet
 
 ### Rust
 
-- [x] Use external code:
-- [ ] Language Server Support
+Can run top level code, and runs `dbg!` on the last line:
 
-`Rust-analyzer` does work by hacking with line numbers and ranges on the server end, but it's not reliable enough to release.
+```rust
+let mut x = vec![];
+for i in 5..=8 {
+    x.push(i);
+}
+x.reverse();
+x
+```
+
+```text
+[8, 7, 6, 5]
+```
 
 ### Go
 
-- [x] Import External Code
-- [ ] Language Server Support
+```llama3-8b
+You can write top level code in Go:
+```
 
-### Javascript
+```go
+import "fmt"
+import "os"
+import "log"
 
-- [ ] Import External Code
-- [x] Language Server Support
+// Create a slice of integers
+numbers := []int{5, 6, 7, 8}
 
-### Typescript
+// Reverse the slice
+for i, j := 0, len(numbers)-1; i < j; i, j = i+1, j-1 {
+	numbers[i], numbers[j] = numbers[j], numbers[i]
+}
 
-- [ ] Import External Code
-- [x] Language Server Support
+// Print the reversed slice
+fmt.Println("Reversed slice:", numbers)
+```
+
+```text
+Reversed slice: [8 7 6 5]
+```
+
+### Javascript / TypeScript
+
+JavaScript and TypeScript both work with LSP support, TypeScript uses esbuild for much faster responses. It will ask you to run:
+
+```
+npm install -g esbuild-runner
+```
+
+```ts
+let numbers: number[] = [5, 6, 7, 8];
+numbers = numbers.reverse();
+console.log(numbers)
+```
+
+```text
+[ 8, 7, 6, 5 ]
+```
 
 ### Shell
+
+You can use different shell languages to run scripts on the host system.
+
+Experimental: Saves ENV changes as you run cells
 
 - nu
 - fish
 - bash
 
-## Inspiration
+```shellscript
+#!/bin/bash
+declare -a my_vec=(5 6 7 8)
+reversed=($(printf '%s\n' "${my_vec[@]}" | tac))
+echo "[ "${reversed[@]} "]"
+```
 
-- Jupyter Notebook
-- [This comment](https://news.ycombinator.com/item?id=11042400)
-- Vimwiki
+```text
+[ 8 7 6 5 ]
+```

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.6
+- Default to using MDL.AI when opening a .md file
+- Improve README.md
+
 ## v0.6.5
 
 - Add github actions CI

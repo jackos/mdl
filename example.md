@@ -1,47 +1,31 @@
-```llama3-8b
-Create a function in Rust to generate prime numbers
-```
+# Rust Prime Numbers
 
-Here is a simple implementation of a function to generate prime numbers in Rust:
+Here is a simple Rust function that prints prime numbers up to 27 using a helper function to check if a number is prime:
 
 ```rust
 fn is_prime(n: u32) -> bool {
     if n <= 1 {
         return false;
     }
-    let mut i = 2;
-    while i * i <= n {
+    for i in 2..=(n as f64).sqrt() as u32 {
         if n % i == 0 {
             return false;
         }
-        i += 1;
     }
     true
 }
-fn generate_primes() -> Vec<u32> {
-    let mut primes = Vec::new();
-    let mut num = 2;
-    while num <= 100 { // You can change the range as per your requirement
-        if is_prime(num) {
-            primes.push(num);
-        }
-        num += 1;
-    }
-    primes
-}
 
-fn main() {
-    let primes = generate_primes();
-    println!("{:?}", primes);
+let mut vec = vec![];
+for i in 2..28 {
+    if is_prime(i) {
+        vec.push(i);
+    }
 }
+vec
 ```
 
 ```text
-[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+[2, 3, 5, 7, 11, 13, 17, 19, 23]
 ```
 
-```rust
-Now gen
-```
-
-This code defines two functions: `is_prime` to check if a number is prime and `generate_primes` to generate a sequence of prime numbers in a given range. The `main` function demonstrates how to use these functions to print the generated prime numbers.
+This program uses the `is_prime` function to check if each number is prime, and prints it if it is. The `is_prime` function checks for divisibility up to the square root of the number, which is an optimization for primality testing.You can run this code in a Rust compiler or IDE to see the output.
