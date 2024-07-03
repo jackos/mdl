@@ -2,12 +2,12 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
 import { Cell, CommentDecorator } from "../types";
-import vscode from  "vscode"
+import vscode from "vscode"
 import path from "path"
 
 let tempDir = getTempPath();
 
-export let processCellsPython = (cells: Cell[], command: string): {stream: ChildProcessWithoutNullStreams, clearOutput: boolean }=> {
+export let processCellsPython = (cells: Cell[], command: string): { stream: ChildProcessWithoutNullStreams, clearOutput: boolean } => {
 
     let innerScope = "";
     let cellCount = 0;
@@ -31,23 +31,23 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
             return `${before}${content}${after}`;
         });
         cellCount++;
-        if(cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
+        if (cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
             continue;
-        } 
-        if(cell.contents.startsWith("#mdl:skip")) {
+        }
+        if (cell.contents.startsWith("#mdl:skip")) {
             continue
-        } 
+        }
         let lines = cell.contents.split("\n");
         const len = lines.length;
         let i = 0
         for (let line of lines) {
             i++
-            if (i==1 && line.replace(/\s/g, "").substring(0, 6) == "#file:") {
+            if (i == 1 && line.replace(/\s/g, "").substring(0, 6) == "#file:") {
                 let file = line.split(":")[1].trim()
-                if (file != "main.py"){
+                if (file != "main.py") {
                     let cleaned = ""
-                    for(let line2 of lines){
-                        if(line2.trim() != 'print("!!output-start-cell", flush=True)'){
+                    for (let line2 of lines) {
+                        if (line2.trim() != 'print("!!output-start-cell", flush=True)') {
                             cleaned += line2 + "\n"
                         }
                     }
@@ -78,11 +78,11 @@ export let processCellsPython = (cells: Cell[], command: string): {stream: Child
         }
     };
 
-    let mainFile = path.join(tempDir, "md_notebook.py");
+    let mainFile = path.join(tempDir, "mdl.py");
     let header = `import sys\nsys.path.append("${activeFilePath}")\nsys.path.append("${tempDir}")\nfrom builtins import *\n`
 
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, header + innerScope);
-    
-    return {stream: spawn(command, [mainFile], {cwd: activeFilePath}), clearOutput};
+
+    return { stream: spawn(command, [mainFile], { cwd: activeFilePath }), clearOutput };
 };

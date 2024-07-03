@@ -54,7 +54,8 @@ export class Kernel {
         // Build a object containing languages and their cells
         let cellsStripped: Cell[] = [];
         let matchingCells = 0;
-        let pythonCells = 0;
+        let pythonMatchingCells = 0;
+        let pythonCells: Cell[] = [];
         for (const cell of cellsUpToCurrent) {
             if (cell.document.languageId === cells[0].document.languageId) {
                 matchingCells++;
@@ -64,9 +65,15 @@ export class Kernel {
                     cell: cell,
                 });
             }
+            // Also capture python cells if they exist when running Mojo
             if (cells[0].document.languageId === "mojo") {
-                if(cell.document.languageId === "python") {
-                    pythonCells += 1;
+                if (cell.document.languageId === "python") {
+                    pythonMatchingCells++
+                    pythonCells.push({
+                        index: pythonMatchingCells,
+                        contents: cell.document.getText(),
+                        cell: cell,
+                    });
                 }
             }
         }
@@ -86,7 +93,7 @@ export class Kernel {
                 'Authorization': `Bearer ${getGroqAIKey()}`,
             }
 
-            const messages: ChatMessage[] = [{"role": "user", "content": "You're generating codeblocks to help users solve programming problems, make sure that you put the name of the language in the markdown blocks like ```python"}]
+            const messages: ChatMessage[] = [{ "role": "user", "content": "You're generating codeblocks to help users solve programming problems, make sure that you put the name of the language in the markdown blocks like ```python" }]
             for (const message of cellsStripped) {
                 messages.push({ role: "user", content: message.contents });
             }
@@ -210,7 +217,7 @@ export class Kernel {
                         return
                     }
                     lastRunLanguage = "mojo";
-                    let mojoResult = processCellsMojo(cellsStripped);
+                    let mojoResult = processCellsMojo(cellsStripped, pythonCells);
                     output = mojoResult.stream
                     clearOutput = mojoResult.clearOutput
                     break;
@@ -231,14 +238,13 @@ export class Kernel {
                     output = processCellsGo(cellsStripped);
                     break;
                 case "python":
-                    let command = "python"
+                    let command = "python3"
                     if (commandNotOnPath(command, "")) {
-                        if (commandNotOnPath("python3", "https://www.python.org/downloads/")) {
+                        if (commandNotOnPath("python", "https://www.python.org/downloads/")) {
                             exec.end(false, (new Date).getTime());
                             return
-                        } else {
-                            command = "python3"
                         }
+                        command = "python"
                     }
                     lastRunLanguage = "python";
                     let pyResult = processCellsPython(cellsStripped, command);
@@ -343,7 +349,7 @@ export class Kernel {
                 if (lastRunLanguage == "shell") {
                     currentCellOutput = outputs[1]
                 } else {
-                    currentCellOutput = outputs[currentCellLang.index + pythonCells];
+                    currentCellOutput = outputs[currentCellLang.index + pythonCells.length];
                 }
                 if (!clearOutput && currentCellOutput.trim()) {
                     exec.replaceOutput([new NotebookCellOutput([NotebookCellOutputItem.text(currentCellOutput)])]);
@@ -360,7 +366,6 @@ export class Kernel {
                 }
 
                 // Loop through all the cells and increment version of image if it exists
-
                 if (doc.getCells().length >= (cells[0].index + 1)) {
                     let cell = doc.getCells(new NotebookRange(cells[0].index + 1, cells[0].index + 2))[0]
                     if (cell.kind === vscode.NotebookCellKind.Markup) {
@@ -392,8 +397,8 @@ export class Kernel {
                                 }).then(() => {
                                     // Execute commands to toggle cell edit mode and then toggle it back to preview.
                                     vscode.commands.executeCommand('notebook.cell.edit').then(() => {
-                                    vscode.commands.executeCommand('notebook.cell.quitEdit').then(() => {
-                                        // Optionally, add any additional logic that needs to run after the refresh.
+                                        vscode.commands.executeCommand('notebook.cell.quitEdit').then(() => {
+                                            // Optionally, add any additional logic that needs to run after the refresh.
                                         });
                                     });
                                 });

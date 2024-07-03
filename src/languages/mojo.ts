@@ -4,19 +4,29 @@ import { getTempPath, modularHome } from "../config";
 import { Cell, CommentDecorator } from "../types";
 import path from "path";
 import { window } from "vscode";
+import { processCellsPython } from "./python";
+import { commandNotOnPath } from "../utils";
 
 let tempDir = getTempPath();
 
-export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNullStreams, clearOutput: boolean } => {
+export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: ChildProcessWithoutNullStreams, clearOutput: boolean } => {
+    // If any python cells exist, make sure the generated file is current
+    if (pythonCells) {
+        let command = "python3"
+        if (commandNotOnPath(command, "")) {
+            command = "python"
+        }
+        processCellsPython(pythonCells, command)
+    }
     const activeFilePath = path.dirname(window.activeTextEditor?.document.uri.fsPath as string);
     let outerScope = "";
 
     let innerScope = `def main():`;
 
-    let pythonFileExists = existsSync(path.join(tempDir, "md_notebook.py"));
+    let pythonFileExists = existsSync(path.join(tempDir, "mdl.py"));
     if (pythonFileExists) {
         outerScope += "from python import Python\n"
-        innerScope += `\n    sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n    py = Python.import_module("md_notebook")\n`
+        innerScope += `\n    sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n    py = Python.import_module("mdl")\n`
     }
     let cellCount = 0;
     let clearOutput = false;
@@ -24,7 +34,7 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
 
     for (const cell of cells) {
         innerScope += `\n    print("!!output-start-cell")\n`;
-        cell.contents = cell.contents.trim();
+        // cell.contents = cell.contents.trim();
         const regex = /(\s*print\s*\()(.*?)(\)\s*$)/gm;
 
         cell.contents = cell.contents.replace(regex, (_, before, content, after) => {
@@ -40,15 +50,24 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
         });
 
         cellCount++;
-        if(cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
+        if (cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
             continue;
-        } 
+        }
         let lines = cell.contents.split("\n");
         const len = lines.length;
         let i = 0
         for (let line of lines) {
             i++
-            if(line.startsWith("struct") || line.startsWith("trait") || line.startsWith("from")) {
+            // Keep things in outerScope if they should not go in main()
+            if (
+                line.startsWith("struct") ||
+                line.startsWith("trait") ||
+                line.startsWith("fn") ||
+                line.startsWith("alias") ||
+                line.startsWith("from") ||
+                line.startsWith("import") ||
+                line.startsWith("@")
+            ) {
                 inOuterScope = true;
             } else if (!line.startsWith("  ") && !(line === "")) {
                 inOuterScope = false;
@@ -76,7 +95,7 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
             if (line.startsWith("fn main():") || line.startsWith("def main():")) {
                 continue;
             }
-            if (pythonFileExists && (line.includes('Python.import_module("sys")') || line.trim() == "from python import Python")){
+            if (pythonFileExists && (line.includes('Python.import_module("sys")') || line.trim() == "from python import Python")) {
                 continue;
             }
 
@@ -90,7 +109,7 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
                 }
 
             }
-            if(inOuterScope) {
+            if (inOuterScope) {
                 outerScope += line + "\n"
             } else {
                 innerScope += "    " + line + "\n";
@@ -105,9 +124,9 @@ export let processCellsMojo = (cells: Cell[]): { stream: ChildProcessWithoutNull
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(mainFile, outerScope + innerScope);
     let env = process.env;
-    if(typeof modularHome === "string") {
-        env = {"MODULAR_HOME": modularHome, ...env}
+    if (typeof modularHome === "string") {
+        env = { "MODULAR_HOME": modularHome, ...env }
     }
-    
-    return { stream: spawn('mojo', [mainFile], {cwd: activeFilePath, env}), clearOutput };
+
+    return { stream: spawn('mojo', [mainFile], { cwd: activeFilePath, env }), clearOutput };
 };
