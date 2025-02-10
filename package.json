@@ -18,7 +18,7 @@
     "onCommand:mdl.preview"
   ],
   "engines": {
-    "vscode": "^1.86.0"
+    "vscode": "^1.93.1"
   },
   "repository": {
     "url": "https://github.com/jackos/mdl"
@@ -141,7 +141,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.17",
-    "@types/vscode": "^1.86.0",
+    "@types/vscode": "^1.93.1",
     "esbuild": "^0.20.2",
     "eslint": "^9.1.0",
     "typescript": "^5.4.5"

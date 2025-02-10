@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.8
+
+- Add `:clear`, `:skip`, and `:create` commands to language cells
+- Fix up some issues with `cd` and shell scripts keeping env vars
+- Update vscode to latest engine, previously had some issues opening documents hanging
+
 ## v0.6.7
 - Auto generate module from python cells when running Mojo cell
 

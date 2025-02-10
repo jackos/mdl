@@ -4,7 +4,7 @@ import { getTempPath } from "../config";
 import * as vscode from "vscode";
 import path from "path";
 import { NotebookCell } from "vscode";
-import { CommentDecorator } from "../types";
+import { LanguageCommand } from "../types";
 
 let tempDir = getTempPath();
 
@@ -75,10 +75,9 @@ venv
     main += env_before + contents + env_after
 
     let clearOutput = false;
-    if(contents.startsWith("# " + CommentDecorator.clear)){
+    if(cell.metadata.command.startsWith(LanguageCommand.clear)){
         clearOutput = true
     }
-
     const filename = path.join(tempDir, `main`);
     mkdirSync(tempDir, { recursive: true });
     writeFileSync(filename, main);

@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync, existsSync } from "fs";
 import { getTempPath, modularHome } from "../config";
-import { Cell, CommentDecorator } from "../types";
+import { Cell, LanguageCommand } from "../types";
 import path from "path";
 import { window } from "vscode";
 import { processCellsPython } from "./python";
@@ -34,6 +34,7 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
     let deIndent = false;
 
     for (const cell of cells) {
+        // Empty string if no command otherwise get pos 1 of the split
         innerScope += `\n    print("!!output-start-cell")\n`;
         // cell.contents = cell.contents.trim();
         const regex = /(\s*print\s*\()(.*?)(\)\s*$)/gm;
@@ -51,7 +52,8 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
         });
 
         cellCount++;
-        if (cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
+        const command = cell.cell.metadata.command;
+        if (command.startsWith(LanguageCommand.skip) || command.startsWith(LanguageCommand.create)) {
             continue;
         }
         let lines = cell.contents.split("\n");
@@ -90,7 +92,7 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
                 }
                 continue
             }
-            if (i == 1 && cellCount == cells.length && line.startsWith('# ' + CommentDecorator.clear)) {
+            if (i == 1 && cellCount == cells.length && cell.cell.metadata.command.startsWith(LanguageCommand.clear)) {
                 clearOutput = true
             }
             if (line.startsWith("fn main():") || line.startsWith("def main():")) {

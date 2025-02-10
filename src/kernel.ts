@@ -9,10 +9,11 @@ import { processShell as processShell } from './languages/shell';
 import { processCellsPython } from './languages/python';
 import * as vscode from 'vscode';
 import { processCellsMojo } from './languages/mojo';
-import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID, getGroqAIKey } from "./config"
+import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID, getGroqAIKey, getTempPath } from "./config"
 
-import { Cell, ChatMessage, ChatRequest, CommentDecorator } from "./types"
+import { Cell, ChatMessage, ChatRequest, LanguageCommand } from "./types"
 import { commandNotOnPath, post } from './utils';
+import { writeFileSync } from 'fs';
 
 
 export let lastRunLanguage = '';
@@ -32,6 +33,7 @@ export class Kernel {
         let exec = ctrl.createNotebookCellExecution(cells[0]);
 
         let currentCell = cells[cells.length - 1];
+        console.log("currentCell:", currentCell.document.languageId)
         // Allow for the ability to cancel execution
         let token = exec.token;
         token.onCancellationRequested(() => {
@@ -40,8 +42,18 @@ export class Kernel {
 
         // Used for the cell timer counter
         exec.start((new Date).getTime());
-        // TODO check lang and change comment symbols
-        if (currentCell.document.getText().trimStart().startsWith("#" + CommentDecorator.skip)) {
+        console.log("cells[0].metadata.command:", cells[0].metadata.command)
+        let tempDir = getTempPath();
+
+        if (cells[0].metadata.command.startsWith(LanguageCommand.create)) {
+            let file = cells[0].metadata.command.split("=")
+            if (file.length > 1) {
+                writeFileSync(`${tempDir}/${file[1].trim()}`, cells[0].document.getText())
+            }
+            exec.end(true, (new Date).getTime());
+            return
+        }
+        if (cells[0].metadata.command.startsWith(LanguageCommand.skip)) {
             exec.end(true, (new Date).getTime());
             return
         }
@@ -50,6 +62,8 @@ export class Kernel {
         // Get all cells up to this one
         let range = new NotebookRange(0, cells[0].index + 1);
         let cellsUpToCurrent = doc.getCells(range);
+        
+        const lang = cells[0].document.languageId
 
         // Build a object containing languages and their cells
         let cellsStripped: Cell[] = [];
@@ -66,7 +80,7 @@ export class Kernel {
                 });
             }
             // Also capture python cells if they exist when running Mojo
-            if (cells[0].document.languageId === "mojo") {
+            if (lang === "mojo") {
                 if (cell.document.languageId === "python") {
                     pythonMatchingCells++
                     pythonCells.push({
@@ -77,9 +91,6 @@ export class Kernel {
                 }
             }
         }
-
-        // Get language that was used to run this cell
-        const lang = cells[0].document.languageId;
 
         // Check if clearing output at the end
         let clearOutput = false;

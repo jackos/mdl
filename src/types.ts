@@ -35,7 +35,8 @@ export interface ChatMessage {
     content: string,
 }
 
-export enum CommentDecorator {
-    clear = ":clear",
-    skip = ":skip",
+export enum LanguageCommand {
+    clear = "clear",
+    skip = "skip",
+    create = "create",
 }

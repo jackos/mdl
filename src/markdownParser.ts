@@ -15,7 +15,7 @@ interface ICodeBlockStart {
     langId: string;
 }
 
-const LANG_IDS = new Map([
+export const LANG_IDS = new Map([
     ['js', 'javascript'],
     ['ts', 'typescript'],
     ['rust', 'rust'],
@@ -33,12 +33,11 @@ const LANG_ABBREVS = new Map(
 );
 
 function parseCodeBlockStart(line: string): string | null {
-    const match = line.match(/(    |\t)?```(\S*)/);
+    const match = line.match(/(    |\t)?```(.*)/);
     if (match) {
         return match[2];
     }
     return null;
-
 }
 
 function isCodeBlockStart(line: string): boolean {
@@ -88,7 +87,6 @@ export function parseMarkdown(content: string): RawNotebookCell[] {
     }
 
     function parseCodeBlock(leadingWhitespace: string, lang: string): void {
-        const language = LANG_IDS.get(lang) || lang;
         const startSourceIdx = ++i;
         while (true) {
             const currLine = lines[i];
@@ -105,10 +103,10 @@ export function parseMarkdown(content: string): RawNotebookCell[] {
             .join('\n');
         const trailingWhitespace = parseWhitespaceLines(false);
         if (lang === "text") {
-            cells[cells.length - 1].outputs = [{ items: [{ data: textEncoder.encode(content), mime: "text/plain" }] }];
+            cells[cells.length - 1].outputs = [{ items: [{ data: textEncoder.encode(content), mime: "text/plain"}] }];
         } else {
             cells.push({
-                language,
+                language: lang,
                 content,
                 kind: NotebookCellKind.Code,
                 leadingWhitespace: leadingWhitespace,
@@ -161,7 +159,12 @@ export function writeCellsToMarkdown(cells: ReadonlyArray<NotebookCellData>): st
                 }
             }
             const languageAbbrev = LANG_ABBREVS.get(cell.languageId) ?? cell.languageId;
-            const codePrefix = '```' + languageAbbrev + '\n';
+            let codePrefix = '```' + languageAbbrev;
+            if (cell.metadata?.command) {
+                codePrefix += ` :${cell.metadata.command}\n`;
+            } else {
+                codePrefix += '\n';
+            }
             const contents = cell.value.split(/\r?\n/g)
                 .join('\n');
             const codeSuffix = '\n```';

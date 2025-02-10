@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { getTempPath } from "../config";
-import { Cell, CommentDecorator } from "../types";
+import { Cell, LanguageCommand } from "../types";
 import vscode from "vscode"
 import path from "path"
 
@@ -60,7 +60,7 @@ export let processCellsPython = (cells: Cell[], command: string): { stream: Chil
                 continue
             }
 
-            if (i == 1 && cellCount == cells.length && line.startsWith("# " + CommentDecorator.clear)) {
+            if (i == 1 && cellCount == cells.length && cell.cell.metadata.command.startsWith(LanguageCommand.clear)) {
                 clearOutput = true
             }
             if (line[0] !== " " && i == len && !line.includes("#") && line.trim().split(" ").length == 1 && !line.endsWith(")")) {
