@@ -1,9 +1,9 @@
 {
-  "name": "mdl-ai",
-  "displayName": "MDL.AI",
+  "name": "mdl",
+  "displayName": "Markdown Lab",
   "publisher": "jackos",
-  "version": "0.6.8",
-  "description": "Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.",
+  "version": "0.6.9",
+  "description": "Run markdown code blocks interactively in a notebook with any programming language. Generate markdown code blocks with LLMs.",
   "main": "./dist/extension.js",
   "icon": "mdl.png",
   "keywords": [
@@ -109,7 +109,7 @@
     "customEditors": [
       {
         "viewType": "mdl",
-        "displayName": "MDL.AI",
+        "displayName": "Markdown Lab",
         "selector": [
           {
             "filenamePattern": "*.md"
@@ -121,7 +121,7 @@
     "notebooks": [
       {
         "type": "mdl",
-        "displayName": "mdl",
+        "displayName": "Markdown Lab",
         "priority": "default",
         "selector": [
           {
