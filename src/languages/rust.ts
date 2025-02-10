@@ -134,7 +134,6 @@ export const processCellsRust = (cells: Cell[]): ChildProcessWithoutNullStreams 
         cargo = '[package]\nname = "output"\nversion = "0.0.1"\nedition="2021"\n[dependencies]\n' + crates;
     }
 
-    console.log(`main file: ${tempDir}/rust/src/main.rs`);
     mkdirSync(`${tempDir}/rust/src`, { recursive: true });
     writeFileSync(`${tempDir}/rust/src/macros.rs`, macros);
     writeFileSync(`${tempDir}/rust/src/main.rs`, main);

@@ -93,19 +93,16 @@ export let processCellsGo = (cells: Cell[]): ChildProcessWithoutNullStreams => {
 export let fixImportsGo = (exec: NotebookCellExecution, cell: NotebookCell): Promise<number> => {
     return new Promise((resolve, reject) => {
         let encoder = new TextEncoder();
-        console.log("tidying");
         let tempDir = getTempPath();
         let goMod = "module github.com/mdl/temp\ngo 1.21\n";
         let goModFile = path.join(tempDir, 'go.mod');
         writeFileSync(goModFile, goMod);
         let tidy = spawn('go', ['mod', 'tidy'], { cwd: tempDir });
         tidy.stderr.on("data", (tidyData: Uint8Array) => {
-            console.log("data", tidyData);
             const x = new NotebookCellOutputItem(tidyData, "text/plain");
             exec.appendOutput([new NotebookCellOutput([x])], cell);
         });
         tidy.stdout.on("data", (tidyData: Uint8Array) => {
-            console.log("data", tidyData);
             const x = new NotebookCellOutputItem(tidyData, "text/plain");
             exec.appendOutput([new NotebookCellOutput([x])], cell);
         });

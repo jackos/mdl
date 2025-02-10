@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.15
+
+- Remove console.log statements
+
 ## v0.6.14
 
 - Fix Mojo trying to reinstall on every cell run

@@ -8,8 +8,6 @@ import path from "path"
 let tempDir = getTempPath();
 
 export let processCellsPython = (cells: Cell[], command: string): { stream: ChildProcessWithoutNullStreams, clearOutput: boolean } => {
-    console.log("Made it into here");
-
     let innerScope = "";
     let cellCount = 0;
     let clearOutput = false;

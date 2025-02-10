@@ -33,7 +33,6 @@ export class Kernel {
         let exec = ctrl.createNotebookCellExecution(cells[0]);
 
         let currentCell = cells[cells.length - 1];
-        console.log("currentCell:", currentCell.document.languageId)
         // Allow for the ability to cancel execution
         let token = exec.token;
         token.onCancellationRequested(() => {
@@ -42,7 +41,6 @@ export class Kernel {
 
         // Used for the cell timer counter
         exec.start((new Date).getTime());
-        console.log("cells[0].metadata.command:", cells[0].metadata.command)
         let tempDir = getTempPath();
 
         if (cells[0].metadata.command.startsWith(LanguageCommand.create)) {

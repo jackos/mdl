@@ -10,14 +10,13 @@ export const searchNotes = async () => {
     stat(baseFile, (err, _) => {
         if (err === null) {
         } else if (err.code === 'ENOENT') {
-            console.log('Creating welcome file');
             mkdirSync(basePath, { recursive: true });
             // file does not exist
             writeFile(baseFile, welcomeMessage, { flag: 'wx' }, (err) => {
                 if (err) { throw err; };
             });
         } else {
-            console.log('Error opening file: ', err.code);
+            window.showErrorMessage(`Error opening file: ${err.code}`);
         }
     });
 
