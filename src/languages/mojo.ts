@@ -31,6 +31,7 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
     let cellCount = 0;
     let clearOutput = false;
     let inOuterScope = false;
+    let deIndent = false;
 
     for (const cell of cells) {
         innerScope += `\n    print("!!output-start-cell")\n`;
@@ -93,6 +94,7 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
                 clearOutput = true
             }
             if (line.startsWith("fn main():") || line.startsWith("def main():")) {
+                deIndent = true;
                 continue;
             }
             if (pythonFileExists && (line.includes('Python.import_module("sys")') || line.trim() == "from python import Python")) {
@@ -102,7 +104,7 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
             if (line[0] !== " " && i == len && !line.includes("#") && line.trim().split(" ").length == 1 && !line.endsWith(")")) {
                 // if first char is `!` pretty print
                 if (line[0] === "!") {
-                    innerScope += `    let pprint = Python.import_module("pprint")\n`;
+                    innerScope += `    var pprint = Python.import_module("pprint")\n`;
                     line = "pprint(" + line.substring(1) + ")";
                 } else {
                     line = "print(" + line + ")";
@@ -112,8 +114,10 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
             if (inOuterScope) {
                 outerScope += line + "\n"
             } else {
-                innerScope += "    " + line + "\n";
-
+                if (!deIndent) {
+                    innerScope += "    "
+                }
+                innerScope += line + "\n";
             }
         }
     };

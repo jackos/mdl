@@ -36,6 +36,6 @@ export interface ChatMessage {
 }
 
 export enum CommentDecorator {
-    clear = "mdl:clear",
-    skip = "mdl:skip",
+    clear = ":clear",
+    skip = ":skip",
 }

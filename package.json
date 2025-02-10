@@ -61,7 +61,6 @@
           "default": "gpt-4-turbo",
           "description": "Check out available models here: https://platform.openai.com/docs/models/overview"
         }
-
       }
     },
     "commands": [
@@ -98,12 +97,12 @@
           "OpenAI",
           "openai"
         ],
-        "extensions": [ ],
+        "extensions": [],
         "firstLine": "^#!.*\\b(openai)\\b"
       },
       {
         "id": "llama3-8b",
-        "extensions": [ ],
+        "extensions": [],
         "firstLine": "^#!.*\\b(llama3-8b)\\b"
       }
     ],
@@ -137,11 +136,11 @@
     "watch": "node ./watch.mjs",
     "package": "vsce package",
     "vscode:prepublish": "npm run compile",
-    "install-extension": "code --install-extension $(ls mdl-*)",
+    "install-extension": "cursor --install-extension $(ls mdl-*)",
     "i": "npm run compile && npm run package && npm run install-extension"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.17.17",
     "@types/vscode": "^1.86.0",
     "esbuild": "^0.20.2",
     "eslint": "^9.1.0",

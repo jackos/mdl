@@ -56,6 +56,7 @@ class MarkdownProvider implements NotebookSerializer {
     deserializeNotebook(data: Uint8Array, _token: CancellationToken): NotebookData | Thenable<NotebookData> {
         const content = Buffer.from(data)
             .toString('utf8');
+        console.log("got the content");
 
         const cellRawData = parseMarkdown(content);
         const cells = cellRawData.map(rawToNotebookCellData);
