@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.12
+
+- Fix issue with vscode marketplace
+
 ## v0.6.11
 
 - Update vscode engine to work with latest Cursor
