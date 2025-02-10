@@ -2,15 +2,15 @@
   "name": "mdlab",
   "displayName": "Markdown Lab",
   "publisher": "jackos",
-  "version": "0.6.10",
+  "version": "0.6.11",
   "description": "Run markdown code blocks interactively in a notebook with any programming language, and generate code blocks with LLMs.",
   "main": "./dist/extension.js",
   "icon": "mdl.png",
   "keywords": [
-    "md",
     "markdown",
+    "lab",
+    "md",
     "notebook",
-    "notebooks",
     "jupyter"
   ],
   "activationEvents": [
@@ -18,7 +18,7 @@
     "onCommand:mdl.preview"
   ],
   "engines": {
-    "vscode": "1.93.1"
+    "vscode": "1.96.2"
   },
   "repository": {
     "url": "https://github.com/jackos/mdl"
@@ -140,10 +140,10 @@
     "i": "npm run compile && npm run package && npm run install-extension"
   },
   "devDependencies": {
-    "@types/node": "^20.17.17",
-    "@types/vscode": "1.93",
-    "esbuild": "^0.20.2",
-    "eslint": "^9.1.0",
-    "typescript": "^5.4.5"
+    "@types/node": "^22.13.1",
+    "@types/vscode": "1.96",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.20.0",
+    "typescript": "^5.7.3"
   }
 }

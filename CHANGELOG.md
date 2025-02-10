@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.6.11
+
+- Update vscode engine to work with latest Cursor
+
+## v0.6.10
+
+- Fix shortname
+
+## v0.6.9
+
+- Change name to `Markdown Lab`
+
 ## v0.6.8
 
 - Add `:clear`, `:skip`, and `:create` commands to language cells
