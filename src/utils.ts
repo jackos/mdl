@@ -13,8 +13,9 @@ export const commandNotOnPath = (command: string, link: string): boolean => {
         vscode.window.showErrorMessage(`command: ${command} not on path. Add to path or follow link to install`, ...[`Install ${command}`]).then((_)=>{
             vscode.env.openExternal(vscode.Uri.parse(link));
         });
+        return true;
     }
-    return true;
+    return false;
   }
 }
 

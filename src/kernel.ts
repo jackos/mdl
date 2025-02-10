@@ -223,14 +223,17 @@ export class Kernel {
             const mimeType = `text/plain`;
             switch (lang) {
                 case "mojo":
-                    // Attempt to install Mojo globally if it's not on path
-                    await installMojo();
-                    // If failed to install, end execution
-                    if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
-                        // Run the installation commands
-                        exec.end(false, (new Date).getTime());
-                        return;
+                    if (commandNotOnPath('mojo', "")) {
+                        // Attempt to install Mojo globally if it's not on path
+                        await installMojo();
+                        // If failed to install, end execution
+                        if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
+                            // Run the installation commands
+                            exec.end(false, (new Date).getTime());
+                            return;
+                        }
                     }
+
                     lastRunLanguage = "mojo";
                     let mojoResult = processCellsMojo(cellsStripped, pythonCells);
                     output = mojoResult.stream

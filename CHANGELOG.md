@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.6.14
+
+- Fix Mojo trying to reinstall on every cell run
+- Fix Python language commands
+
 ## v0.6.13
 
 - Finish rename to `mdlab`
