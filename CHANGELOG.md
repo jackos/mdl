@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.16
+
+- Small README updates
+
 ## v0.6.15
 
 - Remove console.log statements
@@ -42,7 +46,7 @@
 - Auto generate module from python cells when running Mojo cell
 
 ## v0.6.6
-- Default to using MDL.AI when opening a .md file
+- Default to using mdlab when opening a .md file
 - Improve README.md
 
 ## v0.6.5

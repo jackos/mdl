@@ -52,7 +52,7 @@ Press `alt+o` to open up the source code being used to generate outputs, which w
 
 It's very simple to add your own language, look inside [src/languages/rust.ts](https://github.com/jackos/mdl/blob/main/src/languages/python.ts) for an example, then add your language to the switch statement in [`src/kernel.ts`](https://github.com/jackos/mdl/blob/main/src/kernel.ts). PRs welcomed!
 
-This README.md was created with MDL.AI, these are some special features for different languages:
+This README.md was created with `mdlab`, these are some special features for different languages:
 
 ### Python
 
@@ -74,7 +74,7 @@ Mojo is a new Systems programming language for AI developers with Python syntax 
 
 It works with top level code and has some extra features like printing the last line.
 
-Anything you create in an MDL.AI notebook with Python will be available from Mojo via the `py` module:
+Any variables you initialize in a Python cell will be available from Mojo via the `py` module:
 
 ```mojo
 var res = String("Adding a String from Python to a Mojo variable: ") + py.x
