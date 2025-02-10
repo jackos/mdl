@@ -6,20 +6,28 @@ export let outputChannel = vscode.window.createOutputChannel('mdlab', { log: tru
 export function getOutputChannel(): vscode.OutputChannel {
     return outputChannel;
 }
-export const commandNotOnPath = (command: string, link: string): boolean => {
+export const commandNotOnPath = (command: string, link: string, tryInstall: boolean = false): boolean => {
   try {
     // Use the "where" command on Windows or the "which" command on macOS/Linux
     const cmd = process.platform === 'win32' ? 'where' : 'which';
+    outputChannel.appendLine(`checking if ${command} is on path...`);
     execSync(`${cmd} ${command}`, { stdio: 'ignore' });
+    outputChannel.appendLine(`${command} was on path...`);
     return false;
   } catch (error) {
-    if(link) {
+    outputChannel.appendLine(`${command} not on path with error: ${error}`);
+    if (tryInstall) {
+        vscode.window.showInformationMessage(`${command} not on path, attempting to install...`);
+    }
+    else if(link) {
+        outputChannel.appendLine(`returning link to install ${command} for the user`);
         vscode.window.showErrorMessage(`command: ${command} not on path. Add to path or follow link to install`, ...[`Install ${command}`]).then((_)=>{
             vscode.env.openExternal(vscode.Uri.parse(link));
         });
-        return true;
+    } else {
+        vscode.window.showErrorMessage(`command: ${command} not on path. Install and add it to path`);
     }
-    return false;
+    return true;
   }
 }
 
@@ -87,6 +95,8 @@ export async function installMojo(): Promise<void> {
     vscode.window.showInformationMessage("Exposing Mojo globally...");
     // Note the proper escaping for the inner command
     await runCommand(`magic global expose add -e max $(find "$HOME/.modular/envs/max/bin" -type f -exec basename {} \\;)`);
+
+    vscode.window.showInformationMessage("Mojo installed successfully!");
   } catch (err: any) {
     vscode.window.showErrorMessage(`Error during Mojo installation: ${err.message}`);
   }

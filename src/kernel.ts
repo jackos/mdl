@@ -84,7 +84,6 @@ export class Kernel {
                     contents: cell.document.getText(),
                     cell: cell,
                 });
-                outputChannel.appendLine(`found ${matchingCells} cells matching language: ${lang}`);
             }
             // Also capture python cells if they exist when running Mojo
             if (lang === "mojo") {
@@ -95,10 +94,11 @@ export class Kernel {
                         contents: cell.document.getText(),
                         cell: cell,
                     });
-                    outputChannel.appendLine(`found ${pythonMatchingCells} python cells for Mojo interop`);
                 }
             }
         }
+        outputChannel.appendLine(`found ${matchingCells} cells matching language: ${lang}`);
+        outputChannel.appendLine(`found ${pythonMatchingCells} python cells for Mojo interop`);
 
         // Check if clearing output at the end
         let clearOutput = false;
@@ -231,15 +231,16 @@ export class Kernel {
             const mimeType = `text/plain`;
             switch (lang) {
                 case "mojo":
-                    if (commandNotOnPath('mojo', "")) {
-                        // Attempt to install Mojo globally if it's not on path
+                    let mojoMissing = commandNotOnPath('mojo', "https://modular.com/mojo", true)
+                    if (mojoMissing) {
+                        outputChannel.appendLine(`mojo not on path, installing...`);
                         await installMojo();
-                        // If failed to install, end execution
+                        outputChannel.appendLine(`mojo installed, checking again...`);
                         if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
-                            // Run the installation commands
                             exec.end(false, (new Date).getTime());
                             return;
                         }
+                        outputChannel.appendLine(`mojo successfully installed`);
                     }
 
                     lastRunLanguage = "mojo";

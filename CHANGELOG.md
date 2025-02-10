@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.6.18
+
+- Fix installation process bug for Mojo
+- Move log messages outside of loop
+
 ## v0.6.17
 
 - Fix issue with notebook editor sometimes hanging
