@@ -2,6 +2,10 @@ import { ChildProcessWithoutNullStreams, execSync, spawn } from "child_process";
 import vscode from "vscode"
 import { ChatResponse } from "./types";
 
+export let outputChannel = vscode.window.createOutputChannel('mdlab', { log: true });
+export function getOutputChannel(): vscode.OutputChannel {
+    return outputChannel;
+}
 export const commandNotOnPath = (command: string, link: string): boolean => {
   try {
     // Use the "where" command on Windows or the "which" command on macOS/Linux
@@ -20,7 +24,7 @@ export const commandNotOnPath = (command: string, link: string): boolean => {
 }
 
 
-export const post = async (url, headers, body): Promise<ChatResponse> => {
+export const post = async (url: string, headers: Record<string, string>, body: string): Promise<ChatResponse> => {
     try {
         let response = await fetch(url, { headers, body, method: 'POST' });
 
@@ -34,8 +38,12 @@ export const post = async (url, headers, body): Promise<ChatResponse> => {
         vscode.window.showInformationMessage(`Response from LLM: ${JSON.stringify(json, null, 2)}`);
         return json as ChatResponse;
         // Proceed with the `result` if needed
-    } catch (error) {
-        vscode.window.showErrorMessage("Error with fetch request:" + error.toString());
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage("Error with fetch request:" + error.message);
+        } else {
+            vscode.window.showErrorMessage("Error with fetch request:" + String(error));
+        }
         return {} as ChatResponse;
     }
 }

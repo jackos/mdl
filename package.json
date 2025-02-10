@@ -2,10 +2,15 @@
   "name": "mdlab",
   "displayName": "Markdown Lab",
   "publisher": "jackos",
-  "version": "0.6.16",
+  "version": "0.6.17",
   "description": "Run markdown code blocks interactively in a notebook with any programming language, and generate code blocks with LLMs.",
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "icon": "mdlab.png",
+  "categories": [
+    "Notebooks",
+    "Machine Learning",
+    "Programming Languages"
+  ],
   "keywords": [
     "markdown",
     "lab",
@@ -18,7 +23,7 @@
     "onCommand:mdlab.preview"
   ],
   "engines": {
-    "vscode": "1.96.2"
+    "vscode": "^1.96.0"
   },
   "repository": {
     "url": "https://github.com/jackos/mdlab"
@@ -106,18 +111,6 @@
         "firstLine": "^#!.*\\b(llama3-8b)\\b"
       }
     ],
-    "customEditors": [
-      {
-        "viewType": "mdlab",
-        "displayName": "Markdown Lab",
-        "selector": [
-          {
-            "filenamePattern": "*.md"
-          }
-        ],
-        "priority": "default"
-      }
-    ],
     "notebooks": [
       {
         "type": "mdlab",
@@ -132,17 +125,16 @@
     ]
   },
   "scripts": {
-    "compile": "node ./build.mjs",
-    "watch": "node ./watch.mjs",
-    "package": "vsce package",
     "vscode:prepublish": "npm run compile",
-    "install-extension": "cursor --install-extension $(ls mdlab-*)",
-    "i": "npm run compile && npm run package && npm run install-extension"
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "install-extension": "cursor --install-extension $(ls mdlab-*) --force",
+    "i": "npm run package && npm run install-extension"
   },
   "devDependencies": {
     "@types/node": "^22.13.1",
-    "@types/vscode": "1.96",
-    "esbuild": "^0.25.0",
+    "@types/vscode": "^1.96.2",
     "eslint": "^9.20.0",
     "typescript": "^5.7.3"
   }

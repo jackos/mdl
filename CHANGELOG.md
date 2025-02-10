@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.17
+
+- Fix issue with notebook editor sometimes hanging
+- Migrate to compiling with tsc instead of esbuild
+- Fix strict TSC checks
+- Add logging to output channel `mdlab` to help debug issues
+
 ## v0.6.16
 
 - Small README updates

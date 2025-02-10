@@ -12,7 +12,7 @@ import { processCellsMojo } from './languages/mojo';
 import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID, getGroqAIKey, getTempPath } from "./config"
 
 import { Cell, ChatMessage, ChatRequest, LanguageCommand } from "./types"
-import { commandNotOnPath, post, installMojo } from './utils';
+import { commandNotOnPath, post, installMojo, outputChannel } from './utils';
 import { writeFileSync } from 'fs';
 
 
@@ -22,15 +22,19 @@ export let lastRunLanguage = '';
 // and running it through different languages, then returning results in the same format.
 export class Kernel {
     async executeCells(doc: NotebookDocument, cells: NotebookCell[], ctrl: NotebookController): Promise<void> {
+        outputChannel.appendLine('executing all cells...');
         for (const cell of cells) {
             await this.executeCell(doc, [cell], ctrl)
         }
+        outputChannel.appendLine('finished executing all cells');
     }
 
     async executeCell(doc: NotebookDocument, cells: NotebookCell[], ctrl: NotebookController): Promise<void> {
+        outputChannel.appendLine('executing cell...');
         let decoder = new TextDecoder;
         let encoder = new TextEncoder;
         let exec = ctrl.createNotebookCellExecution(cells[0]);
+        outputChannel.appendLine('created notebook cell execution');
 
         let currentCell = cells[cells.length - 1];
         // Allow for the ability to cancel execution
@@ -42,22 +46,26 @@ export class Kernel {
         // Used for the cell timer counter
         exec.start((new Date).getTime());
         let tempDir = getTempPath();
+        outputChannel.appendLine('using temp directory: ' + tempDir);
 
         if (cells[0].metadata.command.startsWith(LanguageCommand.create)) {
             let file = cells[0].metadata.command.split("=")
             if (file.length > 1) {
+                outputChannel.appendLine('writing cell to temp file: ' + `${tempDir}/${file[1].trim()}`);
                 writeFileSync(`${tempDir}/${file[1].trim()}`, cells[0].document.getText())
             }
             exec.end(true, (new Date).getTime());
             return
         }
         if (cells[0].metadata.command.startsWith(LanguageCommand.skip)) {
+            outputChannel.appendLine('skipping cell for execution');
             exec.end(true, (new Date).getTime());
             return
         }
         exec.clearOutput(cells[0]);
 
         // Get all cells up to this one
+        outputChannel.appendLine('getting cells up to: ' + cells[0].index + 1);
         let range = new NotebookRange(0, cells[0].index + 1);
         let cellsUpToCurrent = doc.getCells(range);
         
@@ -76,6 +84,7 @@ export class Kernel {
                     contents: cell.document.getText(),
                     cell: cell,
                 });
+                outputChannel.appendLine(`found ${matchingCells} cells matching language: ${lang}`);
             }
             // Also capture python cells if they exist when running Mojo
             if (lang === "mojo") {
@@ -86,6 +95,7 @@ export class Kernel {
                         contents: cell.document.getText(),
                         cell: cell,
                     });
+                    outputChannel.appendLine(`found ${pythonMatchingCells} python cells for Mojo interop`);
                 }
             }
         }
@@ -154,12 +164,11 @@ export class Kernel {
         else if (lang === "openai") {
             lastRunLanguage = "openai";
             const url = 'https://api.openai.com/v1/chat/completions';
-            const headers = {
+            const headers: Record<string, string> = {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${getOpenAIKey()}`,
             };
             let orgId = getOpenAIOrgID()
-            let model = getOpenAIModel() || "couldn't get model"
             if (orgId) {
                 headers['OpenAI-Organization'] = orgId
             }
@@ -167,6 +176,7 @@ export class Kernel {
             for (const message of cellsStripped) {
                 messages.push({ role: "user", content: message.contents });
             }
+            let model = getOpenAIModel() || "model is undefined"
             const data: ChatRequest = {
                 model,
                 messages
@@ -386,6 +396,7 @@ export class Kernel {
                     let cell = doc.getCells(new NotebookRange(cells[0].index + 1, cells[0].index + 2))[0]
                     if (cell.kind === vscode.NotebookCellKind.Markup) {
                         let text = cell.document.getText();
+                        // @ts-ignore
                         text.replace(/(.*[^`]*<img\s*src\s*=\s*".*?)(\?version=(\d+))?"(.*)/g, (match, prefix, versionQuery, versionNum, suffix) => {
                             if (match) {
                                 let replaceText = ""
