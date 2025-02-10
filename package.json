@@ -2,10 +2,10 @@
   "name": "mdlab",
   "displayName": "Markdown Lab",
   "publisher": "jackos",
-  "version": "0.6.12",
+  "version": "0.6.13",
   "description": "Run markdown code blocks interactively in a notebook with any programming language, and generate code blocks with LLMs.",
   "main": "./dist/extension.js",
-  "icon": "mdl.png",
+  "icon": "mdlab.png",
   "keywords": [
     "markdown",
     "lab",
@@ -14,14 +14,14 @@
     "jupyter"
   ],
   "activationEvents": [
-    "onNotebook:mdl",
-    "onCommand:mdl.preview"
+    "onNotebook:mdlab",
+    "onCommand:mdlab.preview"
   ],
   "engines": {
     "vscode": "1.96.2"
   },
   "repository": {
-    "url": "https://github.com/jackos/mdl"
+    "url": "https://github.com/jackos/mdlab"
   },
   "author": "Jack Clayton",
   "license": "ISC",
@@ -34,29 +34,29 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "mdl configuration",
+      "title": "mdlab configuration",
       "properties": {
-        "mdl.basePath": {
+        "mdlab.basePath": {
           "description": "Path where searchable notes will be stored",
           "type": "string",
           "scope": "window"
         },
-        "mdl.openaiOrgID": {
+        "mdlab.openaiOrgID": {
           "type": "string",
           "default": "",
           "description": "Leave blank if not part of an org, get your org id at https://platform.openai.com/account/org-settings"
         },
-        "mdl.openaiKey": {
+        "mdlab.openaiKey": {
           "type": "string",
           "default": "",
           "description": "Set up an API key at: https://platform.openai.com/account/api-keys"
         },
-        "mdl.groqKey": {
+        "mdlab.groqKey": {
           "type": "string",
           "default": "",
           "description": "Set up an API key at: https://console.groq.com/keys"
         },
-        "mdl.openaiModel": {
+        "mdlab.openaiModel": {
           "type": "string",
           "default": "gpt-4-turbo",
           "description": "Check out available models here: https://platform.openai.com/docs/models/overview"
@@ -65,29 +65,29 @@
     },
     "commands": [
       {
-        "command": "mdl.search",
-        "title": "mdl: Search notes",
+        "command": "mdlab.search",
+        "title": "mdlab: Search notes",
         "description": "Adds notes base path to workspace and opens `find in files`"
       },
       {
-        "command": "mdl.openMain",
-        "title": "mdl: Open generated code",
+        "command": "mdlab.openMain",
+        "title": "mdlab: Open generated code",
         "description": "Opens the code being generated, by adding the folder to the workspace"
       },
       {
-        "command": "mdl.deleteTemp",
-        "title": "mdl: Delete Tempory Folder",
+        "command": "mdlab.deleteTemp",
+        "title": "mdlab: Delete Tempory Folder",
         "description": "Delete the temporary folder with all the generated code files"
       }
     ],
     "keybindings": [
       {
         "key": "alt+f",
-        "command": "mdl.search"
+        "command": "mdlab.search"
       },
       {
         "key": "alt+o",
-        "command": "mdl.openMain"
+        "command": "mdlab.openMain"
       }
     ],
     "languages": [
@@ -108,7 +108,7 @@
     ],
     "customEditors": [
       {
-        "viewType": "mdl",
+        "viewType": "mdlab",
         "displayName": "Markdown Lab",
         "selector": [
           {
@@ -120,7 +120,7 @@
     ],
     "notebooks": [
       {
-        "type": "mdl",
+        "type": "mdlab",
         "displayName": "Markdown Lab",
         "priority": "default",
         "selector": [
@@ -136,7 +136,7 @@
     "watch": "node ./watch.mjs",
     "package": "vsce package",
     "vscode:prepublish": "npm run compile",
-    "install-extension": "cursor --install-extension $(ls mdl-*)",
+    "install-extension": "cursor --install-extension $(ls mdlab-*)",
     "i": "npm run compile && npm run package && npm run install-extension"
   },
   "devDependencies": {

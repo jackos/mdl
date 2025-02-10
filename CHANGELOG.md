@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.13
+
+- Finish rename to `mdlab`
+- Install Mojo globally if not on PATH
+- Fix python language commands
+- Publish on push instead of tag
+
 ## v0.6.12
 
 - Fix issue with vscode marketplace
@@ -38,7 +45,6 @@
 - Fix outputs from ML models having empty cells
 - Add Groq llama3-8B option - 400ms latency
 - Update to latest dependencies
-- Rename project to `mdl-ai`
 
 ## v0.6.3
 
@@ -46,7 +52,6 @@
 
 ## v0.6.2
 
-- Add `# mdl:clear` to not print or save output in Mojo and Python
 - Add `python3` check if `python` not on path
 - Shellscript cells now save environment changes
 

@@ -31,11 +31,8 @@ export let processCellsPython = (cells: Cell[], command: string): { stream: Chil
             return `${before}${content}${after}`;
         });
         cellCount++;
-        if (cell.contents.startsWith("#mdl:skip") || cell.contents.startsWith("# mdl:skip")) {
+        if (cell.cell.metadata.startsWith(LanguageCommand.skip)) {
             continue;
-        }
-        if (cell.contents.startsWith("#mdl:skip")) {
-            continue
         }
         let lines = cell.contents.split("\n");
         const len = lines.length;
@@ -78,7 +75,7 @@ export let processCellsPython = (cells: Cell[], command: string): { stream: Chil
         }
     };
 
-    let mainFile = path.join(tempDir, "mdl.py");
+    let mainFile = path.join(tempDir, "mdlab.py");
     let header = `import sys\nsys.path.append("${activeFilePath}")\nsys.path.append("${tempDir}")\nfrom builtins import *\n`
 
     mkdirSync(tempDir, { recursive: true });

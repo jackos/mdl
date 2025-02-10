@@ -82,7 +82,6 @@ export let processCellsGo = (cells: Cell[]): ChildProcessWithoutNullStreams => {
         }
     };
     let main = "package main\n" + imports + outerScope + "func main() {\nlog.SetOutput(os.Stdout)\n" + innerScope + "}";
-    // let dir = path.join(spawnSync('go', ['env', 'GOPATH']).stdout.toString().trim(), "src", "github.com", "mdl", "temp");
     let dir = getTempPath();
     let mainFile = path.join(dir, 'main.go');
     mkdirSync(dir, { recursive: true });

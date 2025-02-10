@@ -23,10 +23,10 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
 
     let innerScope = `def main():`;
 
-    let pythonFileExists = existsSync(path.join(tempDir, "mdl.py"));
+    let pythonFileExists = existsSync(path.join(tempDir, "mdlab.py"));
     if (pythonFileExists) {
         outerScope += "from python import Python\n"
-        innerScope += `\n    sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n    py = Python.import_module("mdl")\n`
+        innerScope += `\n    sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n    py = Python.import_module("mdlab")\n`
     }
     let cellCount = 0;
     let clearOutput = false;

@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { ChildProcessWithoutNullStreams, execSync, spawn } from "child_process";
 import vscode from "vscode"
 import { ChatResponse } from "./types";
 
@@ -37,4 +37,48 @@ export const post = async (url, headers, body): Promise<ChatResponse> => {
         vscode.window.showErrorMessage("Error with fetch request:" + error.toString());
         return {} as ChatResponse;
     }
+}
+
+
+/**
+ * Runs a shell command using spawn and returns a promise that resolves with the command output.
+ */
+function runCommand(command: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child: ChildProcessWithoutNullStreams = spawn(command, { shell: true });
+    let output = '';
+
+    child.stdout.on('data', (data: Uint8Array) => {
+      output += data.toString();
+    });
+    child.stderr.on('data', (data: Uint8Array) => {
+      output += data.toString();
+    });
+    child.on('error', (err: Error) => {
+      reject(err);
+    });
+    child.on('close', (code: number) => {
+      if (code === 0) {
+        resolve(output);
+      } else {
+        reject(new Error(`Command "${command}" exited with code ${code}`));
+      }
+    });
+  });
+}
+
+export async function installMojo(): Promise<void> {
+  try {
+    vscode.window.showInformationMessage("Installing Magic, the Mojo package manager...");
+    await runCommand("curl -ssL https://magic.modular.com | bash");
+
+    vscode.window.showInformationMessage("Installing Mojo...");
+    await runCommand("magic global install max");
+
+    vscode.window.showInformationMessage("Exposing Mojo globally...");
+    // Note the proper escaping for the inner command
+    await runCommand(`magic global expose add -e max $(find "$HOME/.modular/envs/max/bin" -type f -exec basename {} \\;)`);
+  } catch (err: any) {
+    vscode.window.showErrorMessage(`Error during Mojo installation: ${err.message}`);
+  }
 }

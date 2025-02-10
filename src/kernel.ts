@@ -4,7 +4,7 @@ import { processCellsRust } from "./languages/rust";
 import { processCellsGo } from "./languages/go";
 import { processCellsJavascript } from "./languages/javascript";
 import { processCellsTypescript } from "./languages/typescript";
-import { ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawnSync, spawn } from 'child_process';
 import { processShell as processShell } from './languages/shell';
 import { processCellsPython } from './languages/python';
 import * as vscode from 'vscode';
@@ -12,7 +12,7 @@ import { processCellsMojo } from './languages/mojo';
 import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID, getGroqAIKey, getTempPath } from "./config"
 
 import { Cell, ChatMessage, ChatRequest, LanguageCommand } from "./types"
-import { commandNotOnPath, post } from './utils';
+import { commandNotOnPath, post, installMojo } from './utils';
 import { writeFileSync } from 'fs';
 
 
@@ -165,7 +165,7 @@ export class Kernel {
             if (orgId) {
                 headers['OpenAI-Organization'] = orgId
             }
-            const messages: ChatMessage[] = [{ role: "system", content: "You are a helpful bot named mdl, that generates concise code blocks to solve programming problems" }];
+            const messages: ChatMessage[] = [{ role: "system", content: "You are a helpful bot named mdlab, that generates concise code blocks to solve programming problems" }];
             for (const message of cellsStripped) {
                 messages.push({ role: "user", content: message.contents });
             }
@@ -223,9 +223,13 @@ export class Kernel {
             const mimeType = `text/plain`;
             switch (lang) {
                 case "mojo":
+                    // Attempt to install Mojo globally if it's not on path
+                    await installMojo();
+                    // If failed to install, end execution
                     if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
+                        // Run the installation commands
                         exec.end(false, (new Date).getTime());
-                        return
+                        return;
                     }
                     lastRunLanguage = "mojo";
                     let mojoResult = processCellsMojo(cellsStripped, pythonCells);

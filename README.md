@@ -1,4 +1,4 @@
-# MDL.AI
+# Markdown Lab
 
 Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.
 
@@ -11,7 +11,7 @@ Generate notebook code blocks with LLMs that you can run interactively with any 
 - Click the run button to generate the output which is saved to markdown
 
 __Important Note__
-When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then reopen wth `mdl` only when you need it.
+When you right-click on a file and select `Reopen Editor With...` you can `configure default editor` to be the standard `Text Editor` if you choose, and then reopen wth `mdlab` only when you need it.
 
 ## AI Code Generation
 
@@ -19,14 +19,14 @@ When you right-click on a file and select `Reopen Editor With...` you can `confi
 
 ### OpenAI
 
-- [Set up an OpenAI key here](https://platform.openai.com/account/api-keys) and change the setting: `mdl: openai key`
-- Default model is `gpt-3.5-turbo`, change the setting with `mdl: openai model` e.g. `gpt-4`
+- [Set up an OpenAI key here](https://platform.openai.com/account/api-keys) and change the setting: `mdlab: openai key`
+- Default model is `gpt-3.5-turbo`, change the setting with `mdlab: openai model` e.g. `gpt-4`
 - Select `openai` as your language in the bottom right and ask a question
 - Run the code blocks it generates for you
 
 ### Groq
 
-- [Set up a Groq key here](https://platform.openai.com/account/api-keys) and change the setting: `mdl: Groq key`
+- [Set up a Groq key here](https://platform.openai.com/account/api-keys) and change the setting: `mdlab: Groq key`
 - Select `llama3-8b` as your language and ask it a question
 - Run the code blocks it generates for you
 
@@ -38,11 +38,11 @@ You don't have to go back and run old cells if you change them, every execution 
 
 ## Keybindings
 
-You can change keybindings in File > Preferences > Keybindings > search for "mdl". Or you can run them via command palette typing in "mdl"
+You can change keybindings in File > Preferences > Keybindings > search for "mdlab". Or you can run them via command palette typing in "mdlab"
 
 ### Search notes
 
-Set up a folder with `.md` documents in `mdl: base path` and press `alt+f` to open a open search. This allows you to quickly search through your notes and execute code blocks. If you've ever used vimwiki this might bring back memories, but it's not reliant on a specific structure so you can set up your files for whatever static site generator you like.
+Set up a folder with `.md` documents in `mdlab: base path` and press `alt+f` to open a open search. This allows you to quickly search through your notes and execute code blocks. If you've ever used vimwiki this might bring back memories, but it's not reliant on a specific structure so you can set up your files for whatever static site generator you like.
 
 ### Open generated code
 

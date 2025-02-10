@@ -11,7 +11,7 @@ import { rmSync } from 'fs';
 
 const kernel = new Kernel();
 export async function activate(context: ExtensionContext) {
-    const controller = notebooks.createNotebookController('mdl', 'mdl', 'mdl');
+    const controller = notebooks.createNotebookController('mdlab', 'mdlab', 'mdlab');
     controller.supportedLanguages = [
         'rust',
         'go',
@@ -36,9 +36,9 @@ export async function activate(context: ExtensionContext) {
             kernel.executeCell(doc, cells, ctrl);
         }
     };
-    context.subscriptions.push(commands.registerCommand('mdl.search', searchNotes));
-    context.subscriptions.push(commands.registerCommand('mdl.openMain', openMain));
-    context.subscriptions.push(commands.registerCommand('mdl.deleteTemp', () => rmSync(getTempPath(), { recursive: true, force: true })
+    context.subscriptions.push(commands.registerCommand('mdlab.search', searchNotes));
+    context.subscriptions.push(commands.registerCommand('mdlab.openMain', openMain));
+    context.subscriptions.push(commands.registerCommand('mdlab.deleteTemp', () => rmSync(getTempPath(), { recursive: true, force: true })
     ));
 
     const notebookSettings = {
@@ -49,7 +49,7 @@ export async function activate(context: ExtensionContext) {
         }
     };
 
-    context.subscriptions.push(workspace.registerNotebookSerializer('mdl', new MarkdownProvider(), notebookSettings));
+    context.subscriptions.push(workspace.registerNotebookSerializer('mdlab', new MarkdownProvider(), notebookSettings));
 }
 
 class MarkdownProvider implements NotebookSerializer {
