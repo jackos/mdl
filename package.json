@@ -2,7 +2,7 @@
   "name": "mdl-ai",
   "displayName": "MDL.AI",
   "publisher": "jackos",
-  "version": "0.6.6",
+  "version": "0.6.8",
   "description": "Generate notebook code blocks with LLMs that you can run interactively with any programming language. The source code is pure markdown and can render anywhere.",
   "main": "./dist/extension.js",
   "icon": "mdl.png",
@@ -18,7 +18,7 @@
     "onCommand:mdl.preview"
   ],
   "engines": {
-    "vscode": "^1.93.1"
+    "vscode": "1.93.1"
   },
   "repository": {
     "url": "https://github.com/jackos/mdl"
@@ -141,7 +141,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.17",
-    "@types/vscode": "^1.93.1",
+    "@types/vscode": "1.93",
     "esbuild": "^0.20.2",
     "eslint": "^9.1.0",
     "typescript": "^5.4.5"
