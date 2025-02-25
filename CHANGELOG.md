@@ -2,6 +2,12 @@
 
 ## v0.6.18
 
+- Add `:once` directive for long running function code doesn't have dependent cells
+- Move Mojo alias and functions into inner scope in main function, to fix closures
+- Fix up the initial Mojo installation if not found
+
+## v0.6.18
+
 - Fix installation process bug for Mojo
 - Move log messages outside of loop
 

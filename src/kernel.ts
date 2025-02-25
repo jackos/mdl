@@ -8,12 +8,14 @@ import { ChildProcessWithoutNullStreams, spawnSync, spawn } from 'child_process'
 import { processShell as processShell } from './languages/shell';
 import { processCellsPython } from './languages/python';
 import * as vscode from 'vscode';
+import {homedir} from 'os';
 import { processCellsMojo } from './languages/mojo';
 import { getOpenAIKey, getOpenAIModel, getOpenAIOrgID, getGroqAIKey, getTempPath } from "./config"
 
 import { Cell, ChatMessage, ChatRequest, LanguageCommand } from "./types"
 import { commandNotOnPath, post, installMojo, outputChannel } from './utils';
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
+import path from 'path';
 
 
 export let lastRunLanguage = '';
@@ -69,7 +71,7 @@ export class Kernel {
         let range = new NotebookRange(0, cells[0].index + 1);
         let cellsUpToCurrent = doc.getCells(range);
         
-        const lang = cells[0].document.languageId
+        let lang = cells[0].document.languageId
 
         // Build a object containing languages and their cells
         let cellsStripped: Cell[] = [];
@@ -232,15 +234,26 @@ export class Kernel {
             switch (lang) {
                 case "mojo":
                     let mojoMissing = commandNotOnPath('mojo', "https://modular.com/mojo", true)
+                    // Check if global mojo exists
                     if (mojoMissing) {
-                        outputChannel.appendLine(`mojo not on path, installing...`);
-                        await installMojo();
-                        outputChannel.appendLine(`mojo installed, checking again...`);
-                        if (commandNotOnPath('mojo', "https://modular.com/mojo")) {
-                            exec.end(false, (new Date).getTime());
-                            return;
+                        // So we don't keep reinstalling mojo on each cell run before user has
+                        // restarted vscode to put mojo on PATH.
+                        let globalMojoDir = path.join(homedir(), ".modular", "bin");
+                        outputChannel.appendLine(`checking for mojo at: ${path.join(globalMojoDir, "mojo")}`);
+
+                        if (existsSync(path.join(globalMojoDir, "mojo"))) {
+                            // Propagates to subprocesses to find mojo related binaries
+                            process.env.PATH = process.env.PATH + path.delimiter + globalMojoDir;
+                        } else {
+                            outputChannel.appendLine(`mojo not on path, installing...`);
+                            // Will be empty string if install fails, otherwise will point to global mojo binary
+                            const installed = await installMojo();
+                            // If install fails, end execution
+                            if (!installed) {
+                                exec.end(false, (new Date).getTime());
+                                return;
+                            }
                         }
-                        outputChannel.appendLine(`mojo successfully installed`);
                     }
 
                     lastRunLanguage = "mojo";

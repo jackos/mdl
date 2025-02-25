@@ -1,6 +1,8 @@
 import { ChildProcessWithoutNullStreams, execSync, spawn } from "child_process";
 import vscode from "vscode"
 import { ChatResponse } from "./types";
+import { homedir } from "os";
+import * as path from 'path';
 
 export let outputChannel = vscode.window.createOutputChannel('mdlab', { log: true });
 export function getOutputChannel(): vscode.OutputChannel {
@@ -84,7 +86,7 @@ function runCommand(command: string): Promise<string> {
   });
 }
 
-export async function installMojo(): Promise<void> {
+export async function installMojo(): Promise<boolean> {
   try {
     vscode.window.showInformationMessage("Installing Magic, the Mojo package manager...");
     await runCommand("curl -ssL https://magic.modular.com | bash");
@@ -92,12 +94,16 @@ export async function installMojo(): Promise<void> {
     vscode.window.showInformationMessage("Installing Mojo...");
     await runCommand("magic global install max");
 
-    vscode.window.showInformationMessage("Exposing Mojo globally...");
-    // Note the proper escaping for the inner command
-    await runCommand(`magic global expose add -e max $(find "$HOME/.modular/envs/max/bin" -type f -exec basename {} \\;)`);
+    vscode.window.showInformationMessage("Exposing Mojo...");
+    await runCommand(`magic global expose add -e max mojo`);
+
+    const mojoPath = path.join(homedir(), ".modular", "bin");
+    process.env.PATH = process.env.PATH + path.delimiter + mojoPath;
 
     vscode.window.showInformationMessage("Mojo installed successfully!");
+    return true;
   } catch (err: any) {
     vscode.window.showErrorMessage(`Error during Mojo installation: ${err.message}`);
+    return false;
   }
 }

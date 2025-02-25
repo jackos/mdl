@@ -2,7 +2,7 @@
   "name": "mdlab",
   "displayName": "Markdown Lab",
   "publisher": "jackos",
-  "version": "0.6.18",
+  "version": "0.6.19",
   "description": "Run markdown code blocks interactively in a notebook with any programming language, and generate code blocks with LLMs.",
   "main": "./out/extension.js",
   "icon": "mdlab.png",
@@ -129,7 +129,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package",
-    "install-extension": "cursor --install-extension $(ls mdlab-*) --force",
+    "install-extension": "code --install-extension $(ls mdlab-*) --force",
     "i": "npm run package && npm run install-extension"
   },
   "devDependencies": {

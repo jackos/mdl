@@ -5,13 +5,13 @@ import { Cell, LanguageCommand } from "../types";
 import path from "path";
 import { window } from "vscode";
 import { processCellsPython } from "./python";
-import { commandNotOnPath } from "../utils";
+import { commandNotOnPath, outputChannel } from "../utils";
 
 let tempDir = getTempPath();
 
 export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: ChildProcessWithoutNullStreams, clearOutput: boolean } => {
     // If any python cells exist, make sure the generated file is current
-    if (pythonCells) {
+    if (pythonCells.length) {
         let command = "python3"
         if (commandNotOnPath(command, "")) {
             command = "python"
@@ -23,17 +23,19 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
 
     let innerScope = `def main():`;
 
-    let pythonFileExists = existsSync(path.join(tempDir, "mdlab.py"));
-    if (pythonFileExists) {
+    if (pythonCells.length) {
         outerScope += "from python import Python\n"
         innerScope += `\n    sys = Python.import_module("sys")\n    sys.path.append("${activeFilePath}")\n    sys.path.append("${tempDir}")\n    py = Python.import_module("mdlab")\n`
     }
     let cellCount = 0;
     let clearOutput = false;
     let inOuterScope = false;
-    let deIndent = false;
+    let decorator = "";
 
-    for (const cell of cells) {
+    for (let c = 0; c < cells.length; c++) {
+        const cell = cells[c];
+
+        let deIndent = false;
         // Empty string if no command otherwise get pos 1 of the split
         innerScope += `\n    print("!!output-start-cell")\n`;
         // cell.contents = cell.contents.trim();
@@ -51,8 +53,11 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
             return `${before}${content}${after}`;
         });
 
-        cellCount++;
         const command = cell.cell.metadata.command;
+        // Only add this cell to the program it's the active execution cell
+        if (command.startsWith(LanguageCommand.once) && c != cells.length - 1) {
+            continue;
+        }
         if (command.startsWith(LanguageCommand.skip) || command.startsWith(LanguageCommand.create)) {
             continue;
         }
@@ -60,20 +65,25 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
         const len = lines.length;
         let i = 0
         for (let line of lines) {
+            outputChannel.appendLine(line)
             i++
             // Keep things in outerScope if they should not go in main()
+            if (line.startsWith("@")) {
+                decorator += line + "\n"
+            }
             if (
                 line.startsWith("struct") ||
                 line.startsWith("trait") ||
-                line.startsWith("fn") ||
-                line.startsWith("alias") ||
                 line.startsWith("from") ||
-                line.startsWith("import") ||
-                line.startsWith("@")
+                line.startsWith("import")
             ) {
                 inOuterScope = true;
+                if (decorator) {
+                    continue;
+                }
             } else if (!line.startsWith("  ") && !(line === "")) {
                 inOuterScope = false;
+                decorator = "";
             }
             if (i == 1 && line.replace(/\s/g, "").substring(0, 6) == "#file:") {
                 let file = line.split(":")[1].trim()
@@ -99,7 +109,7 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
                 deIndent = true;
                 continue;
             }
-            if (pythonFileExists && (line.includes('Python.import_module("sys")') || line.trim() == "from python import Python")) {
+            if (pythonCells.length && (line.includes('Python.import_module("sys")') || line.trim() == "from python import Python")) {
                 continue;
             }
 
@@ -114,12 +124,25 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
 
             }
             if (inOuterScope) {
+                if (decorator) {
+                    outerScope += decorator + "\n"
+                    decorator = ""
+                }
                 outerScope += line + "\n"
             } else {
                 if (!deIndent) {
-                    innerScope += "    "
+                    if (decorator) {
+                        innerScope += "    " + decorator
+                        decorator = ""
+                    }
+                    innerScope += "    " + line + "\n"
+                } else {
+                    if (decorator) {
+                        innerScope += decorator
+                        decorator = ""
+                    }
+                    innerScope += line + "\n";
                 }
-                innerScope += line + "\n";
             }
         }
     };
@@ -134,5 +157,5 @@ export let processCellsMojo = (cells: Cell[], pythonCells: Cell[]): { stream: Ch
         env = { "MODULAR_HOME": modularHome, ...env }
     }
 
-    return { stream: spawn('mojo', [mainFile], { cwd: activeFilePath, env }), clearOutput };
+    return { stream: spawn("mojo", [mainFile], { cwd: activeFilePath, env }), clearOutput };
 };
